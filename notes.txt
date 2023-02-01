@@ -1,21 +1,43 @@
-main admin
-admin creates manager and tech
-manager and tech will have the id of admin
-manager create mr
-mr will heve the id of manager
-mr create a new doctor
-doctor will have id of mr
+2 schema
+members
+doctors
 
-default usertype will be specified to each role
 3 -> admin
 2 -> manager
 1 -> tech 
 0 -> mr
 
-on dashbord 
-1) when anyone logins, his/her data will be fetched from the db including usertype.
-2) i) one thing we can do is we can create different dashboard for different login users
-  ii) 
+TO add new mr
+/create
+on select we will choose 0
+it will be shaved in db
+likewise for manager tech and admin
 
-Registration
+on dashbord 
+0) on login we will be passed a token which will contain the user id 
+1) on bases of id dashboard will determine the ufcntion on bases of usertype
+
+2) on bases of user type 
+mr
+    3) suppose the usetype is 0 he will be only allowed all the registration and a button `new doctor`
+    4) On click of  `new doctor` he will be shown a form where certain data be will be shows and made mr will fill the form on click of the submit button inside the payload the mr id will also be there whcih will be the foregin key from the members table
+    5) rest all the functions will be unaccessable
+
+manager
+    1) suppose the usetype is 2, the registration and manage request tab will be shown
+    2) on that page all the request will be fetched from the doctor table, he will verify the the document and mark the status to approved by ho
+    3) manager will have access to modify the data of doctor table, so modifiy by field will contain the manager name whcih will be fetch based on the user id inside the token
+
+tech 
+  1) suppose the usetype is 1, the registration and manage request tab and master will be show or the user will have access to 
+  2) all the data from the doctor table having status approved will be shown in the doctor page 
+  3) now tech will create a website and and make the changes in the status files to on board and soon   live on website create and will also add the website url
+  
+  4) All the live site will be stored in a new table 
+
+
+
+/getmember
+get the detail of logged in used based on the role
+
     
