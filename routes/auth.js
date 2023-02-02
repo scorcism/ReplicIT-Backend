@@ -101,7 +101,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
     const managerID = req.user.id;
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -117,6 +117,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
         console.log(checkManager)
         const userRole = checkManager.role;
         console.log("role: " + checkManager)
+        let role  = 0
         if (userRole == 1) {
             //  the current user is admin
             // he is allowed to create manager or tech member
