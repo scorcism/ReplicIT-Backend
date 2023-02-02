@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 
 const DoctorSchema = new Schema({
-    "managerID": {
+    "mrID": {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'member'
     },
@@ -42,7 +42,7 @@ const DoctorSchema = new Schema({
     },
     "status": {
         type: String,
-        default: "request"
+        default: "requested"
     },
     "createdOn":{
         type:Date,
@@ -57,13 +57,14 @@ const DoctorSchema = new Schema({
     },
     "verifiedBy":{
         type:String,
-        // mr name will come 
-        default: "not Verified"
+        // manager name will come 
+
     },
     "updatedOn":{
         type:Date,
+
     },
-    "updateBy":{
+    "updatedBy":{
         type:String,
         // mr name will come 
     },
