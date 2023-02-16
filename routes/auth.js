@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const fetchUser = require('../middleware/fetchUser');
 const Doctor = require('../models/Doctor');
 const JWT_SECRET = "supermanbatmansinchan"
+const { body, validationResult } = require('express-validator');
 
 // contains routes for 
 /**
@@ -33,7 +34,7 @@ router.post('/createadmin', async (req, res) => {
     try {
         // let role = 3
         const newMember = await Member.create({
-            name, email, password:secPassword, role: 3, adminID: id
+            name, email, password: secPassword, role: 3, adminID: id
         })
 
         const data = {
@@ -80,11 +81,10 @@ router.post("/createmember", fetchUser, async (req, res) => {
             // he is allowed to create manager or tech member
 
 
-    const salt = await bcrypt.genSaltSync(10);
-    const secPassword = await bcrypt.hash(password, salt);
-
+            const salt = await bcrypt.genSaltSync(10);
+            const secPassword = await bcrypt.hash(password, salt);
             const newMember = await Member.create({
-                name, email, password:secPassword, role, adminID: checkAdmin.id
+                name, email, password: secPassword, role, adminID: checkAdmin.id
             })
 
             const data = {
@@ -127,7 +127,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
         const userRole = checkManager.role;
         console.log("role: " + checkManager)
         let role = 0
-        if (userRole == 1) {
+        if (userRole == 2) {
             //  the current user is admin
             // he is allowed to create manager or tech member
             const newMember = await Member.create({
@@ -155,7 +155,10 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
 
 
-router.get("/members", async (req, res) => {
+router.get("/members",  [
+    body('email', 'Enter a valid Email').isEmail(),
+    body('password', 'Password Length should >= 5').isLength({ min: 5 }),
+], async (req, res) => {
     try {
         const allMembers = await Member.find();
         res.json({ allMembers })
@@ -165,13 +168,15 @@ router.get("/members", async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
+    console.log("Login hit")
     console.log(req.body)
     const { email, password } = req.body;
 
     try {
-        let user =await Member.findOne({ email })
-        console.log(user.email, user.password)
-
+        console.log("Inside login try")
+        let user = await Member.findOne({ email })
+        // console.log(user.email, user.password)
+        
         if (!user) {
             return res.status(400).json({ error: "Enter a valid credentials" })
         }
@@ -187,11 +192,12 @@ router.post('/login', async (req, res) => {
         }
         let authtoken = jwt.sign(data, JWT_SECRET);
         res.json({ authtoken })
-
+        
         // save this token into local storage
-
+        
     } catch (error) {
-        res.status(500).json({ error })
+        console.log("Inside login try")
+        res.status(500).json({ error:"Internal server error" })
     }
 })
 
