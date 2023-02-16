@@ -2,6 +2,7 @@ const express = require('express');
 const Member = require('../models/Member');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const fetchUser = require('../middleware/fetchUser');
 const Doctor = require('../models/Doctor');
 const JWT_SECRET = "supermanbatmansinchan"
@@ -26,10 +27,13 @@ router.post('/createadmin', async (req, res) => {
         return res.status(400).json({ error: "Admin already exists" })
     }
 
+    const salt = await bcrypt.genSaltSync(10);
+    const secPassword = await bcrypt.hash(password, salt);
+
     try {
         // let role = 3
         const newMember = await Member.create({
-            name, email, password, role: 3, adminID: id
+            name, email, password:secPassword, role: 3, adminID: id
         })
 
         const data = {
@@ -74,8 +78,13 @@ router.post("/createmember", fetchUser, async (req, res) => {
         if (userRole == 3) {
             //  the current user is admin
             // he is allowed to create manager or tech member
+
+
+    const salt = await bcrypt.genSaltSync(10);
+    const secPassword = await bcrypt.hash(password, salt);
+
             const newMember = await Member.create({
-                name, email, password, role, adminID: checkAdmin.id
+                name, email, password:secPassword, role, adminID: checkAdmin.id
             })
 
             const data = {
@@ -117,7 +126,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
         console.log(checkManager)
         const userRole = checkManager.role;
         console.log("role: " + checkManager)
-        let role  = 0
+        let role = 0
         if (userRole == 1) {
             //  the current user is admin
             // he is allowed to create manager or tech member
@@ -146,10 +155,10 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
 
 
-router.get("/members",async (req,res) => {
+router.get("/members", async (req, res) => {
     try {
         const allMembers = await Member.find();
-        res.json({allMembers})
+        res.json({ allMembers })
     } catch (error) {
         res.status(500).json({ error: "Internal server error" })
     }
@@ -160,12 +169,17 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        let user = Member.findOne({ email })
+        let user =await Member.findOne({ email })
+        console.log(user.email, user.password)
 
         if (!user) {
             return res.status(400).json({ error: "Enter a valid credentials" })
         }
 
+        const passwordCompare = await bcrypt.compare(password, user.password);
+        if (!passwordCompare) {
+            return res.status(400).json({ error: "Enter correct credentials" });
+        }
         let data = {
             user: {
                 id: user.id
@@ -177,7 +191,7 @@ router.post('/login', async (req, res) => {
         // save this token into local storage
 
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" })
+        res.status(500).json({ error })
     }
 })
 
@@ -297,7 +311,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
 // also change the verified by
 router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
     const doctorID = req.params.id
-    const toChangeTo = req.body.toChange;
+    const toChangeTo = req.body.tochange;
     try {
 
         // check if doctors with the id exists or not
