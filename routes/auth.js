@@ -110,7 +110,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
     const managerID = req.user.id;
 
-    const { name, email, password } = req.body;
+    const { name, email, password,role,admin } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -126,12 +126,15 @@ router.post("/createmr", fetchUser, async (req, res) => {
         console.log(checkManager)
         const userRole = checkManager.role;
         console.log("role: " + checkManager)
-        let role = 0
+        // we are taking name email passwod role and admin id from the body
         if (userRole == 2) {
             //  the current user is admin
             // he is allowed to create manager or tech member
+            const salt = await bcrypt.genSaltSync(10);
+            const secPassword = await bcrypt.hash(password, salt);
+
             const newMember = await Member.create({
-                name, email, password, role, managerID: checkManager.id
+                name, email, password:secPassword, role, managerID: checkManager.id,adminId:admin
             })
 
             const data = {
@@ -245,32 +248,12 @@ router.post('/createdr', fetchUser, async (req, res) => {
     try {
         if (role.role <= 3) {
             const {
-                fname,
-                mname,
-                lname,
-                phoneno,
-                email,
-                qualification,
-                specialization,
-                experience,
-                prefeeredDomain,
-                city,
-                state } = req.body;
+                mrID, manager,
+                adminID,name, email
+             } = req.body;
             const newDoctor = await Doctor.create({
-                managerID,
-                fname,
-                mname,
-                lname,
-                phoneno,
-                email,
-                qualification,
-                specialization,
-                experience,
-                prefeeredDomain,
-                city,
-                state,
-                createdBy,
-                updateBy
+                mrID, manager,
+                adminID,name, email
             })
 
             const createNewDoctor = await newDoctor.save();

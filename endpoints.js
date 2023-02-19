@@ -99,5 +99,13 @@ let endpoints = {
         use: "show all the not approved doctor to the mrs",
         return: "doctors object"
     },
+    "/api/auth/notapproveddrs": {
+        body: {  },
+        middleware: "yes",
+        userLogin: "yes",
+        method: "get",
+        use: "show all the not approved doctor to the mrs",
+        return: "doctors object"
+    },
 }
 
