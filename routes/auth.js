@@ -251,15 +251,15 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 mrID, manager,
                 adminID,name, email
              } = req.body;
+
             const newDoctor = await Doctor.create({
                 mrID, manager,
                 adminID,name, email
             })
 
-            const createNewDoctor = await newDoctor.save();
 
             // return createNewDoctor;
-            res.json({ createNewDoctor })
+            res.json({ newDoctor })
         } else {
             return res.status(404).json({ error: "Not allowed" })
         }
@@ -304,7 +304,7 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
     try {
 
         // check if doctors with the id exists or not
-        let d = await Notes.findById(doctorID)
+        let d = await Doctor.findById(doctorID)
         if (!d) { return res.status(404).send("Not Found") }
 
         const userID = req.user.id

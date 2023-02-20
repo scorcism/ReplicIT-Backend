@@ -21,6 +21,10 @@ const DoctorSchema = new Schema({
     "email": {
         type: String
     },
+    "status":{
+        type:String,
+        default:"new"
+    }
    
 }, { timestamps: true })
 
