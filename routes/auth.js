@@ -110,7 +110,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
     const managerID = req.user.id;
 
-    const { name, email, password,role,admin } = req.body;
+    const { name, email, password, role, admin } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -134,7 +134,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
             const secPassword = await bcrypt.hash(password, salt);
 
             const newMember = await Member.create({
-                name, email, password:secPassword, role, managerID: checkManager.id,adminId:admin
+                name, email, password: secPassword, role, managerID: checkManager.id, adminId: admin
             })
 
             const data = {
@@ -158,7 +158,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
 
 
-router.get("/members",  [
+router.get("/members", [
     body('email', 'Enter a valid Email').isEmail(),
     body('password', 'Password Length should >= 5').isLength({ min: 5 }),
 ], async (req, res) => {
@@ -179,7 +179,7 @@ router.post('/login', async (req, res) => {
         console.log("Inside login try")
         let user = await Member.findOne({ email })
         // console.log(user.email, user.password)
-        
+
         if (!user) {
             return res.status(400).json({ error: "Enter a valid credentials" })
         }
@@ -195,12 +195,12 @@ router.post('/login', async (req, res) => {
         }
         let authtoken = jwt.sign(data, JWT_SECRET);
         res.json({ authtoken })
-        
+
         // save this token into local storage
-        
+
     } catch (error) {
         console.log("Inside login try")
-        res.status(500).json({ error:"Internal server error" })
+        res.status(500).json({ error: "Internal server error" })
     }
 })
 
@@ -249,12 +249,12 @@ router.post('/createdr', fetchUser, async (req, res) => {
         if (role.role <= 3) {
             const {
                 mrID, manager,
-                adminID,name, email
-             } = req.body;
+                adminID, name, email
+            } = req.body;
 
             const newDoctor = await Doctor.create({
                 mrID, manager,
-                adminID,name, email
+                adminID, name, email
             })
 
 
@@ -388,10 +388,10 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
-        if (userrole == 2 || userrole == 3) {
+        if (userrole == 2 || userrole == 3 || userrole == 1) {
             // show all the docs with approved status
-            const doctorsA = await Doctor.find({ status: "approved" })
-            res.json({ doctorsA });
+            const doctorsApproved = await Doctor.find({ status: "Approved" })
+            res.json({ doctorsApproved });
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
@@ -400,6 +400,97 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
+
+// show all the Done websites
+// websites which have given the url and all the stuffs done
+// check if the curretn user is tech or admin or not 
+router.get("/donewebsites", fetchUser, async (req, res) => {
+    let userID = req.user.id;
+
+    try {
+        // get the role of the id 
+        let userDetails = await Member.findById(userID);
+        let userrole = userDetails.role
+
+        
+            // show all the docs with approved status
+            const doctorsDone = await Doctor.find({ status: "Done" })
+            res.json({ doctorsDone });
+        
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+// show all the verfied docs websites page and there we will add new filed to db as webisteurl
+// check if the curretn user is tech or admin or not 
+router.get("/verifieddrs", fetchUser, async (req, res) => {
+    let userID = req.user.id;
+
+    try {
+        // get the role of the id 
+        let userDetails = await Member.findById(userID);
+        let userrole = userDetails.role
+
+        if (userrole == 3 || userrole == 1) {
+            // show all the docs with approved status
+            const doctorsApproved = await Doctor.find({ status: "Verified" })
+            res.json({ doctorsApproved });
+        } else {
+            return res.status(401).json({ error: "Not Allowed" });
+        }
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+// check if the curretn user is tech or admin or not 
+// add webiste to the respective doctor in the website filed 
+// the body will contain the website new website
+router.put("/addwebsite/:id", fetchUser, async (req, res) => {
+    let userID = req.user.id;
+    const website  = req.body.website;
+    let doctorID = req.params.id;
+    console.log("inside addwebsite")
+    console.log(website + " website")
+    try {
+
+        // check if doctor with thr id exists or it 
+        let d = await Doctor.findById(doctorID)
+        if (!d) { return res.status(404).send("Not Found") }
+
+        // get the role of the id 
+        let userDetails = await Member.findById(userID);
+        let userrole = userDetails.role
+
+        if (userrole == 3 || userrole == 1) {
+            // if yes then 
+            // add that body data to the webiste filed
+            try {
+                let done = "Done"
+                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status:done, website: website } })
+                res.send({d})
+                // d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, verifiedBy: loggedInUserID, verifiedOn: todayDate } })
+                // res.json({ d });
+            }
+            catch (error) {
+                console.log(error);
+                res.status(500).json({ error: "Internal server error ocured" })
+            }
+        } else {
+            return res.status(401).json({ error: "Not Allowed" });
+        }
+    } catch (e) {
+        // console.log(e)
+        console.log(e);
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+
+
 
 // show all thing to admin and all live websites to admin and tech 
 

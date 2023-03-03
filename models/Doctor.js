@@ -24,6 +24,10 @@ const DoctorSchema = new Schema({
     "status":{
         type:String,
         default:"new"
+    },
+    "website":{
+        type:String,
+        default:null
     }
    
 }, { timestamps: true })
