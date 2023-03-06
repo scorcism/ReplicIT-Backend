@@ -23,9 +23,13 @@ const DoctorSchema = new Schema({
     },
     "status":{
         type:String,
-        default:"new"
+        default:"New"
     },
     "website":{
+        type:String,
+        default:null
+    },
+    "rejectmessage":{
         type:String,
         default:null
     }

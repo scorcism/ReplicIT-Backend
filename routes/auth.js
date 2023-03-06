@@ -245,16 +245,17 @@ router.post('/createdr', fetchUser, async (req, res) => {
     console.log(role.role)
     const createdBy = role.id
     const updateBy = role.id
+    let status = "New"
     try {
         if (role.role <= 3) {
             const {
                 mrID, manager,
-                adminID, name, email
+                adminID, name, email,
             } = req.body;
 
             const newDoctor = await Doctor.create({
                 mrID, manager,
-                adminID, name, email
+                adminID, name, email, status
             })
 
 
@@ -378,6 +379,70 @@ router.get('/getdrs', fetchUser, async (req, res) => {
     }
 })
 
+// All new doctors
+router.get('/getnewdrs', fetchUser, async (req, res) => {
+    try {
+        console.log("getnewdrs")
+        const drs = await Doctor.find({ $or: [{ status: "New" }] })
+        // db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )
+        // db.contributor.find({$or: [{branch: "ECE"}, {joiningYear: 2017}]}).pretty()
+        res.json({ drs });
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+
+// send reject message with respect to that doc 
+// with reject message chnage the state to rejected 
+router.put('/setrejectmessage/:id', fetchUser, async (req, res) => {
+    const message = req.body.message;
+    const doctorID = req.params.id
+    try {
+
+        // check if doctors with the id exists or not
+        let d = await Doctor.findById(doctorID)
+        if (!d) { return res.status(404).send("Not Found") }
+
+        const userID = req.user.id
+        const loggedInUser = await Member.findById(userID);
+        const loggedInUserID = loggedInUser.id
+        const loggedInUserrole = loggedInUser.role
+        const todayDate = Date.now();
+        // we only want to update the status of the doctor request to approved
+        if (loggedInUserrole == 1 || loggedInUserrole == 3 || loggedInUserrole == 2) {
+            // if the loggedin user is manager then he is allowd to update the status of doctor to approved or rejected
+            // find by id and update
+            try {
+                let status = "Rejected"
+                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: status, verifiedBy: loggedInUserID, verifiedOn: todayDate,rejectmessage:message } })
+                res.json({ d });
+            } catch (error) {
+                return res.status(401).json({ error: "Not Allowed" });
+            }
+        }
+        // else if (loggedInUserrole == 2 || loggedInUserrole == 3) {
+        //     // the current user is tech member
+        //     // is is allowed to make the status to `certification`
+        //     try {
+        // d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, updatedBy: loggedInUserID, verifiedOn: todayDate } })
+        //         res.json({ d });
+        //     } catch (error) {
+        //         return res.status(401).json({ error: "Not Allowed" });
+        //     }
+        // }
+        else {
+            return res.status(401).json({ error: "Not Allowed" });
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+
+
 // show all the approved doctors to tech team
 // check if the curretn user is tech or admin or not 
 router.get("/approveddrs", fetchUser, async (req, res) => {
@@ -412,11 +477,11 @@ router.get("/donewebsites", fetchUser, async (req, res) => {
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
-        
-            // show all the docs with approved status
-            const doctorsDone = await Doctor.find({ status: "Done" })
-            res.json({ doctorsDone });
-        
+
+        // show all the docs with approved status
+        const doctorsDone = await Doctor.find({ status: "Done" })
+        res.json({ doctorsDone });
+
     } catch (e) {
         // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
@@ -451,7 +516,7 @@ router.get("/verifieddrs", fetchUser, async (req, res) => {
 // the body will contain the website new website
 router.put("/addwebsite/:id", fetchUser, async (req, res) => {
     let userID = req.user.id;
-    const website  = req.body.website;
+    const website = req.body.website;
     let doctorID = req.params.id;
     console.log("inside addwebsite")
     console.log(website + " website")
@@ -470,8 +535,8 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
             // add that body data to the webiste filed
             try {
                 let done = "Done"
-                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status:done, website: website } })
-                res.send({d})
+                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: done, website: website } })
+                res.send({ d })
                 // d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, verifiedBy: loggedInUserID, verifiedOn: todayDate } })
                 // res.json({ d });
             }
@@ -496,7 +561,7 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
 
 
 // show all the not approved doctor to the mr
-router.get("/notapproveddrs", fetchUser, async () => {
+router.get("/notapproveddrs", fetchUser, async (req,res) => {
     let userID = req.user.id;
 
     try {
@@ -504,10 +569,10 @@ router.get("/notapproveddrs", fetchUser, async () => {
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
-        if (userrole == 0 || userrole == 3) {
+        if (userrole == 0  || userrole == 3  || userrole == 1 ||  userrole == 2) {
             // show all the docs with approved status
-            const doctorsA = await Doctor.find({ status: "rejected" })
-            res.json(doctorsA);
+            const drs = await Doctor.find({ status: "Rejected" })
+            res.json({drs});
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
