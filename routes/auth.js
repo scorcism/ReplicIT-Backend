@@ -253,6 +253,11 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 adminID, name, email,
             } = req.body;
 
+            const checkDoc = await Doctor.findOne({email});
+            if(checkDoc){
+                return res.status(400).json({ error: "Doctor Exists" })
+            }
+
             const newDoctor = await Doctor.create({
                 mrID, manager,
                 adminID, name, email, status
@@ -373,6 +378,17 @@ router.get('/getdrs', fetchUser, async (req, res) => {
     try {
         const drs = await Doctor.find();
         res.json({ drs });
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+// get all the Members
+router.get('/getmembers', fetchUser, async (req, res) => {
+    try {
+        const member = await Member.find();
+        res.json({ member});
     } catch (e) {
         // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
