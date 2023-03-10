@@ -253,8 +253,8 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 adminID, name, email,
             } = req.body;
 
-            const checkDoc = await Doctor.findOne({email});
-            if(checkDoc){
+            const checkDoc = await Doctor.findOne({ email });
+            if (checkDoc) {
                 return res.status(400).json({ error: "Doctor Exists" })
             }
 
@@ -372,12 +372,41 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
     }
 })
 
-
+const ITEMS_PER_PAGE = 10;
 // get all the doctors
 router.get('/getdrs', fetchUser, async (req, res) => {
+
+    const page = req.query.page || 1;
+
     try {
-        const drs = await Doctor.find();
-        res.json({ drs });
+        // otehr query parms here
+        const query = {
+
+        }
+
+        
+        const skip = (page -1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
+        
+        // const drs = await Doctor.find();
+        // res.json({ drs });
+        const countPromise = Doctor.estimatedDocumentCount(query);
+        const itemsPromise = Doctor.find().limit(ITEMS_PER_PAGE).skip(skip);
+        
+
+        const [count,items]  = await Promise.all([countPromise,itemsPromise]);
+        
+        const pageCount = count / ITEMS_PER_PAGE;
+        
+        res.json({
+            pagination: {
+                count,
+                pageCount
+            },
+            items
+        });
+
+
+
     } catch (e) {
         // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
@@ -388,7 +417,7 @@ router.get('/getdrs', fetchUser, async (req, res) => {
 router.get('/getmembers', fetchUser, async (req, res) => {
     try {
         const member = await Member.find();
-        res.json({ member});
+        res.json({ member });
     } catch (e) {
         // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
@@ -432,7 +461,7 @@ router.put('/setrejectmessage/:id', fetchUser, async (req, res) => {
             // find by id and update
             try {
                 let status = "Rejected"
-                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: status, verifiedBy: loggedInUserID, verifiedOn: todayDate,rejectmessage:message } })
+                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: status, verifiedBy: loggedInUserID, verifiedOn: todayDate, rejectmessage: message } })
                 res.json({ d });
             } catch (error) {
                 return res.status(401).json({ error: "Not Allowed" });
@@ -577,7 +606,7 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
 
 
 // show all the not approved doctor to the mr
-router.get("/notapproveddrs", fetchUser, async (req,res) => {
+router.get("/notapproveddrs", fetchUser, async (req, res) => {
     let userID = req.user.id;
 
     try {
@@ -585,10 +614,10 @@ router.get("/notapproveddrs", fetchUser, async (req,res) => {
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
-        if (userrole == 0  || userrole == 3  || userrole == 1 ||  userrole == 2) {
+        if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
             const drs = await Doctor.find({ status: "Rejected" })
-            res.json({drs});
+            res.json({ drs });
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
