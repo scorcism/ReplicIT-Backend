@@ -295,7 +295,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 address,
                 status,
                 createdOn:currenttime,
-                createdBy:role.name
+                createdBy:role._id
             })
 
 
@@ -395,8 +395,8 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
         const userRole = userDetails.role
 
         if (userRole == 0 || userRole == 3) {
-            const doctors = await Doctor.find({ managerID: userID });
-            res.json({ doctors });
+            const items = await Doctor.find({ mrID: userID });
+            res.json({ items });
 
         } else {
             return res.status(401).json({ error: "Not Allowed" });
