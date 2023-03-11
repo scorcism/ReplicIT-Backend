@@ -662,5 +662,27 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
     }
 })
 
+// show all the not approved doctor of respective mr
+router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
+    let userID = req.user.id;
+
+    try {
+        // get the role of the id 
+        let userDetails = await Member.findById(userID);
+        let userrole = userDetails.role
+
+        if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
+            // show all the docs with approved status
+            const drs = await Doctor.find({ status: "Rejected",mrId:userDetails._id })
+            res.json({ drs });
+        } else {
+            return res.status(401).json({ error: "Not Allowed" });
+        }
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
 module.exports = router;
 
