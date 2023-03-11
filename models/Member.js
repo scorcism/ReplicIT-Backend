@@ -7,7 +7,10 @@ const MemberSchema = new Schema({
         type:String,
         default:"1"
     },
-    name: {
+    firstname: {
+        type: String,
+    },
+    lastname: {
         type: String,
     },
     email: {

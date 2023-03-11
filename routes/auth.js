@@ -60,7 +60,7 @@ router.post("/createmember", fetchUser, async (req, res) => {
 
     const adminID = req.user.id;
 
-    const { name, email, password, role } = req.body;
+    const { namename,lastname, email, password, role } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -84,7 +84,7 @@ router.post("/createmember", fetchUser, async (req, res) => {
             const salt = await bcrypt.genSaltSync(10);
             const secPassword = await bcrypt.hash(password, salt);
             const newMember = await Member.create({
-                name, email, password: secPassword, role, adminID: checkAdmin.id
+                firstname,lastname, email, password: secPassword, role, adminID: checkAdmin.id
             })
 
             const data = {
@@ -238,19 +238,39 @@ router.get('/getmemberrole', fetchUser, async (req, res) => {
 
 router.post('/createdr', fetchUser, async (req, res) => {
     // check if the current user is mr or not
+    console.log("inside createdr")
     const mrID = req.user.id;
     console.log(mrID)
 
     const role = await Member.findById(mrID);
+
     console.log(role.role)
+
     const createdBy = role.id
     const updateBy = role.id
+
+    let currenttime = new Date();
+    // currenttime.format("dd/MM/yyyy hh:mm TT");
+
     let status = "New"
+    console.log("id: "+ role)
     try {
         if (role.role <= 3) {
             const {
-                mrID, manager,
-                adminID, name, email,
+                mrID, 
+                manager,
+                adminID, 
+                firstname,
+                middlename,
+                lastname,
+                phone,
+                email,
+                qualification,
+                speciality,
+                experience,
+                license,
+                domain,
+                address
             } = req.body;
 
             const checkDoc = await Doctor.findOne({ email });
@@ -259,8 +279,23 @@ router.post('/createdr', fetchUser, async (req, res) => {
             }
 
             const newDoctor = await Doctor.create({
-                mrID, manager,
-                adminID, name, email, status
+                mrID, 
+                manager,
+                adminID, 
+                firstname,
+                middlename,
+                lastname,
+                phone,
+                email,
+                qualification,
+                speciality,
+                experience,
+                license,
+                domain,
+                address,
+                status,
+                createdOn:currenttime,
+                createdBy:role.name
             })
 
 

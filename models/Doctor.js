@@ -7,7 +7,7 @@ const DoctorSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'member'
     },
-    "manager":{
+    "managerID":{
         type:String,
         default:null
     },
@@ -15,15 +15,65 @@ const DoctorSchema = new Schema({
         type:String,
         default:null
     },
-    "name": {
+    "firstname": {
         type: String
+    },
+    "middlename": {
+        type: String,
+    },
+    "lastname": {
+        type: String
+    },
+    "phone": {
+        tyep: Number,
     },
     "email": {
         type: String
     },
-    "status":{
+    "qualification": {
+        type: String,
+    },
+    "specialty": {
+        type: String,
+    },
+    "experience": {
+        type: Number,
+    },
+    'license':{
+        type:String
+    },
+    "domain": {
+        type: String,
+    },
+    "address": {
+        type: String,
+    },
+    "status": {
+        type: String,
+        default: "requested"
+    },
+    "createdOn":{
+        type:Date,
+        default: Date.now
+    },
+    "createdBy":{
         type:String,
-        default:"New"
+        // mr name will come 
+    },
+    "verifiedOn":{
+        type:Date,
+    },
+    "verifiedBy":{
+        type:String,
+        // manager name will come 
+    },
+    "updatedOn":{
+        type:Date,
+
+    },
+    "updatedBy":{
+        type:String,
+        // mr name will come 
     },
     "website":{
         type:String,
@@ -33,7 +83,7 @@ const DoctorSchema = new Schema({
         type:String,
         default:null
     }
-   
+
 }, { timestamps: true })
 
 const Doctor = mongoose.model('doctor', DoctorSchema);
