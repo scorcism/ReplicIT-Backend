@@ -61,13 +61,13 @@ router.post("/createmember", [
     body('lastname', 'Must contains 3 alphabets').isLength({ min: 3 }),
     body('email', 'Provide an email').isEmail(),
     body('password', 'Must contains 3 alphabets').isLength({ min: 3 }),
-    body('role', 'Important').exists(),
+    // body('role', 'Important').exists(),
 
 ], fetchUser, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: errors });
+        return res.status(400).json({ error: "Check All The Fields" });
     }
 
     const adminID = req.user.id;
