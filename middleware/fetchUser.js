@@ -4,9 +4,9 @@ const JWT_SECRET = "supermanbatmansinchan"
 
 const fetchUser = (req,res,next)=>{
     const token = req.header("auth-token");
-    // console.log(token)
+    // // console.log(token)
     if(!token){
-        console.log("1")
+        // console.log("1")
         res.status(401).json({error: "Authenticate using valid token"})
     }
     try {
@@ -14,7 +14,7 @@ const fetchUser = (req,res,next)=>{
         req.user = data.user;
         next()
     }  catch (error) {
-        console.log("fetchUser: " + error)
+        // console.log("fetchUser: " + error)
         res.status(401).json({ error: "Authenticate using valid token" });
     }
 }

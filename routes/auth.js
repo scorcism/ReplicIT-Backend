@@ -19,7 +19,7 @@ const { body, validationResult } = require('express-validator');
 // this cna be any number
 // This role will always be 3
 router.post('/createadmin', async (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     const { name, email, password, id } = req.body;
 
     // check if member is already present or not
@@ -60,7 +60,7 @@ router.post("/createmember", fetchUser, async (req, res) => {
 
     const adminID = req.user.id;
 
-    const { namename,lastname, email, password, role } = req.body;
+    const { firstname,lastname, email, password, role } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -73,9 +73,9 @@ router.post("/createmember", fetchUser, async (req, res) => {
 
         const checkAdmin = await Member.findById(adminID);
         // get the user role
-        console.log(checkAdmin)
+        // console.log(checkAdmin)
         const userRole = checkAdmin.role;
-        console.log("role: " + userRole)
+        // console.log("role: " + userRole)
         if (userRole == 3) {
             //  the current user is admin
             // he is allowed to create manager or tech member
@@ -110,7 +110,7 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
     const managerID = req.user.id;
 
-    const { name, email, password, role, admin } = req.body;
+    const { firstname,lastname, email, password, role, admin } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -123,18 +123,18 @@ router.post("/createmr", fetchUser, async (req, res) => {
 
         const checkManager = await Member.findById(managerID);
         // get the user role
-        console.log(checkManager)
+        // console.log(checkManager)
         const userRole = checkManager.role;
-        console.log("role: " + checkManager)
+        // console.log("role: " + checkManager)
         // we are taking name email passwod role and admin id from the body
-        if (userRole == 2) {
+        if (userRole == 2 || userRole ==3) {
             //  the current user is admin
             // he is allowed to create manager or tech member
             const salt = await bcrypt.genSaltSync(10);
             const secPassword = await bcrypt.hash(password, salt);
 
             const newMember = await Member.create({
-                name, email, password: secPassword, role, managerID: checkManager.id, adminId: admin
+                firstname,lastname, email, password: secPassword, role, managerID: checkManager._id, adminId: admin
             })
 
             const data = {
@@ -171,14 +171,14 @@ router.get("/members", [
 })
 
 router.post('/login', async (req, res) => {
-    console.log("Login hit")
-    console.log(req.body)
+    // console.log("Login hit")
+    // console.log(req.body)
     const { email, password } = req.body;
 
     try {
-        console.log("Inside login try")
+        // console.log("Inside login try")
         let user = await Member.findOne({ email })
-        // console.log(user.email, user.password)
+        // // console.log(user.email, user.password)
 
         if (!user) {
             return res.status(400).json({ error: "Enter a valid credentials" })
@@ -199,7 +199,7 @@ router.post('/login', async (req, res) => {
         // save this token into local storage
 
     } catch (error) {
-        console.log("Inside login try")
+        // console.log("Inside login try")
         res.status(500).json({ error: "Internal server error" })
     }
 })
@@ -216,7 +216,7 @@ router.get('/getmemberdetails', fetchUser, async (req, res) => {
 
         res.json({ user })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -231,20 +231,20 @@ router.get('/getmemberrole', fetchUser, async (req, res) => {
         const role = user.role
         res.json({ role })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
 
 router.post('/createdr', fetchUser, async (req, res) => {
     // check if the current user is mr or not
-    console.log("inside createdr")
+    // console.log("inside createdr")
     const mrID = req.user.id;
-    console.log(mrID)
+    // console.log(mrID)
 
     const role = await Member.findById(mrID);
 
-    console.log(role.role)
+    // console.log(role.role)
 
     const createdBy = role.id
     const updateBy = role.id
@@ -253,12 +253,12 @@ router.post('/createdr', fetchUser, async (req, res) => {
     // currenttime.format("dd/MM/yyyy hh:mm TT");
 
     let status = "New"
-    console.log("id: "+ role)
+    // console.log("id: "+ role)
     try {
         if (role.role <= 3) {
             const {
                 mrID, 
-                manager,
+                managerID,
                 adminID, 
                 firstname,
                 middlename,
@@ -280,7 +280,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
 
             const newDoctor = await Doctor.create({
                 mrID, 
-                manager,
+                managerID,
                 adminID, 
                 firstname,
                 middlename,
@@ -305,7 +305,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
             return res.status(404).json({ error: "Not allowed" })
         }
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -326,7 +326,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
 //         d = await Doctor.findByIdAndUpdate(doctorID, { $set: newData })
 //         res.send(newData)
 //     } catch (error) {
-//         console.log(error)
+//         // console.log(error)
 //         res.status(500).json({ error: "Internal server error ocured" })
 //     }
 // })
@@ -376,7 +376,7 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 
@@ -402,7 +402,7 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        console.log(e)
+        // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -443,7 +443,7 @@ router.get('/getdrs', fetchUser, async (req, res) => {
 
 
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -454,7 +454,7 @@ router.get('/getmembers', fetchUser, async (req, res) => {
         const member = await Member.find();
         res.json({ member });
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -462,13 +462,13 @@ router.get('/getmembers', fetchUser, async (req, res) => {
 // All new doctors
 router.get('/getnewdrs', fetchUser, async (req, res) => {
     try {
-        console.log("getnewdrs")
+        // console.log("getnewdrs")
         const drs = await Doctor.find({ $or: [{ status: "New" }] })
         // db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )
         // db.contributor.find({$or: [{branch: "ECE"}, {joiningYear: 2017}]}).pretty()
         res.json({ drs });
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -516,7 +516,7 @@ router.put('/setrejectmessage/:id', fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -541,7 +541,7 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -563,7 +563,7 @@ router.get("/donewebsites", fetchUser, async (req, res) => {
         res.json({ doctorsDone });
 
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -586,7 +586,7 @@ router.get("/verifieddrs", fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -598,8 +598,8 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
     let userID = req.user.id;
     const website = req.body.website;
     let doctorID = req.params.id;
-    console.log("inside addwebsite")
-    console.log(website + " website")
+    // console.log("inside addwebsite")
+    // console.log(website + " website")
     try {
 
         // check if doctor with thr id exists or it 
@@ -621,15 +621,15 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
                 // res.json({ d });
             }
             catch (error) {
-                console.log(error);
+                // console.log(error);
                 res.status(500).json({ error: "Internal server error ocured" })
             }
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        // console.log(e)
-        console.log(e);
+        // // console.log(e)
+        // console.log(e);
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -657,7 +657,7 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
@@ -665,21 +665,28 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
 // show all the not approved doctor of respective mr
 router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
     let userID = req.user.id;
+    // console.log("inside not approved dr mr")
 
     try {
         // get the role of the id 
         let userDetails = await Member.findById(userID);
+        // console.log(userDetails)
         let userrole = userDetails.role
 
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
-            const drs = await Doctor.find({ status: "Rejected",mrId:userDetails._id })
+            // const drs = await Doctor.find({ mrId:userDetails._id })
+            const drs = await Doctor.find({$and:[{status:"Rejected"},{mrID:userID}]})
+            // {$and:[{name:"Molu"},{marks:50}]}
+            console.log("notapproveddrsmr")
+            // console.log(drs)
             res.json({ drs });
+            
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
     } catch (e) {
-        // console.log(e)
+        // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
