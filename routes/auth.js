@@ -562,8 +562,8 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
 
         if (userrole == 2 || userrole == 3 || userrole == 1) {
             // show all the docs with approved status
-            const doctorsApproved = await Doctor.find({ status: "Approved" })
-            res.json({ doctorsApproved });
+            const items = await Doctor.find({ status: "Approved" })
+            res.json({ items });
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
