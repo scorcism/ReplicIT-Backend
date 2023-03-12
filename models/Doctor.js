@@ -25,7 +25,7 @@ const DoctorSchema = new Schema({
         type: String
     },
     "phone": {
-        tyep: Number,
+        type: Number,
     },
     "email": {
         type: String

@@ -266,7 +266,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 phone,
                 email,
                 qualification,
-                speciality,
+                specialty,
                 experience,
                 license,
                 domain,
@@ -288,7 +288,7 @@ router.post('/createdr', fetchUser, async (req, res) => {
                 phone,
                 email,
                 qualification,
-                speciality,
+                specialty,
                 experience,
                 license,
                 domain,
@@ -407,6 +407,30 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
     }
 })
 
+// get all the mr of specific manager
+router.get('/getmanagermr', fetchUser, async (req, res) => {
+
+    // check if the current user is mr or not 
+    // if mr get all the doctors
+    try {
+
+        const userID = req.user.id;
+        const userDetails = await Member.findById(userID)
+        const userRole = userDetails.role
+
+        if (userRole == 2) {
+            const items = await Member.find({ managerID: userID });
+            res.json({ items });
+
+        } else {
+            return res.status(401).json({ error: "Not Allowed" });
+        }
+    } catch (e) {
+        // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
 const ITEMS_PER_PAGE = 10;
 // get all the doctors
 router.get('/getdrs', fetchUser, async (req, res) => {
@@ -461,9 +485,12 @@ router.get('/getmembers', fetchUser, async (req, res) => {
 
 // All new doctors
 router.get('/getnewdrs', fetchUser, async (req, res) => {
+    const manager = req.user.id
     try {
         // console.log("getnewdrs")
-        const drs = await Doctor.find({ $or: [{ status: "New" }] })
+        // const drs = await Doctor.find({$and:[{status:"Rejected"},{mrID:userID}]})
+
+        const drs = await Doctor.find({ $and: [{ status: "New" },{managerID:manager}] })
         // db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )
         // db.contributor.find({$or: [{branch: "ECE"}, {joiningYear: 2017}]}).pretty()
         res.json({ drs });
