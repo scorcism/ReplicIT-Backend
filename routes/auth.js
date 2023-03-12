@@ -56,7 +56,19 @@ router.post('/createadmin', async (req, res) => {
 // here we will check if the fetch user is admin or not
 // this end poit will have access to only two roles i.2 to create new tech memebr or to create manger ot to create new mr
 // new mr will have id of manger 
-router.post("/createmember", fetchUser, async (req, res) => {
+router.post("/createmember",[
+    body('firstname','Must contains 3 alphabets').isLength({min:3}),
+    body('lastname','Must contains 3 alphabets').isLength({min:3}),
+    body('email','Provide an email').isEmail(),
+    body('password','Must contains 3 alphabets').isLength({min:3}),
+    body('role','Important').exists(),
+
+] ,fetchUser, async (req, res) => {
+
+    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ error:errors});
+        }
 
     const adminID = req.user.id;
 
@@ -106,7 +118,20 @@ router.post("/createmember", fetchUser, async (req, res) => {
 })
 
 
-router.post("/createmr", fetchUser, async (req, res) => {
+router.post("/createmr", 
+    [
+        body('firstname','Must contains 3 alphabets').isLength({min:3}),
+        body('lastname','Must contains 3 alphabets').isLength({min:3}),
+        body('email','Provide an email').isEmail(),
+        body('password','Must contains 3 alphabets').isLength({min:3}),
+        body('role','Important').exists(), 
+    ]
+,fetchUser, async (req, res) => {
+
+    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ error:errors});
+        }
 
     const managerID = req.user.id;
 
@@ -170,9 +195,20 @@ router.get("/members", [
     }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', 
+    [
+        body('email',"Enter a Valid Email").isEmail(),
+        body('password',"Enter a valid Password").isLength({min:5}),
+    ]
+,async (req, res) => {
     // console.log("Login hit")
     // console.log(req.body)
+
+    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ error:"Check Again the fields :)"});
+        }
+
     const { email, password } = req.body;
 
     try {
@@ -236,7 +272,25 @@ router.get('/getmemberrole', fetchUser, async (req, res) => {
     }
 })
 
-router.post('/createdr', fetchUser, async (req, res) => {
+router.post('/createdr', [
+    body('firstname','').isLength({min:3}),
+    body('middlename','').isLength({min:3}),
+    body('lastname','').isLength({min:3}),
+    body('phone','').isNumeric(),
+    body('email','').isEmail(),
+    body('qualification','').isLength({min:3}),
+    body('specialty','').isLength({min:3}),
+    body('experience','').isNumeric(),
+    body('license','').isLength({min:3}),
+    body('domain','').isLength({min:3}),
+    body('address','').isLength({min:5}),
+],fetchUser, async (req, res) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error:"Check Again the fields :)"});
+    }
+
     // check if the current user is mr or not
     // console.log("inside createdr")
     const mrID = req.user.id;
