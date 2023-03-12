@@ -56,23 +56,23 @@ router.post('/createadmin', async (req, res) => {
 // here we will check if the fetch user is admin or not
 // this end poit will have access to only two roles i.2 to create new tech memebr or to create manger ot to create new mr
 // new mr will have id of manger 
-router.post("/createmember",[
-    body('firstname','Must contains 3 alphabets').isLength({min:3}),
-    body('lastname','Must contains 3 alphabets').isLength({min:3}),
-    body('email','Provide an email').isEmail(),
-    body('password','Must contains 3 alphabets').isLength({min:3}),
-    body('role','Important').exists(),
+router.post("/createmember", [
+    body('firstname', 'Must contains 3 alphabets').isLength({ min: 3 }),
+    body('lastname', 'Must contains 3 alphabets').isLength({ min: 3 }),
+    body('email', 'Provide an email').isEmail(),
+    body('password', 'Must contains 3 alphabets').isLength({ min: 3 }),
+    body('role', 'Important').exists(),
 
-] ,fetchUser, async (req, res) => {
+], fetchUser, async (req, res) => {
 
     const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ error:errors});
-        }
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors });
+    }
 
     const adminID = req.user.id;
 
-    const { firstname,lastname, email, password, role } = req.body;
+    const { firstname, lastname, email, password, role } = req.body;
 
     // check if the current user is admin or not
     // by chcking the role
@@ -96,7 +96,7 @@ router.post("/createmember",[
             const salt = await bcrypt.genSaltSync(10);
             const secPassword = await bcrypt.hash(password, salt);
             const newMember = await Member.create({
-                firstname,lastname, email, password: secPassword, role, adminID: checkAdmin.id
+                firstname, lastname, email, password: secPassword, role, adminID: checkAdmin.id
             })
 
             const data = {
@@ -118,67 +118,67 @@ router.post("/createmember",[
 })
 
 
-router.post("/createmr", 
+router.post("/createmr",
     [
-        body('firstname','Must contains 3 alphabets').isLength({min:3}),
-        body('lastname','Must contains 3 alphabets').isLength({min:3}),
-        body('email','Provide an email').isEmail(),
-        body('password','Must contains 3 alphabets').isLength({min:3}),
-        body('role','Important').exists(), 
+        body('firstname', 'Must contains 3 alphabets').isLength({ min: 3 }),
+        body('lastname', 'Must contains 3 alphabets').isLength({ min: 3 }),
+        body('email', 'Provide an email').isEmail(),
+        body('password', 'Must contains 3 alphabets').isLength({ min: 3 }),
+        body('role', 'Important').exists(),
     ]
-,fetchUser, async (req, res) => {
+    , fetchUser, async (req, res) => {
 
-    const errors = validationResult(req);
+        const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error:errors});
+            return res.status(400).json({ error: errors });
         }
 
-    const managerID = req.user.id;
+        const managerID = req.user.id;
 
-    const { firstname,lastname, email, password, role, admin } = req.body;
+        const { firstname, lastname, email, password, role, admin } = req.body;
 
-    // check if the current user is admin or not
-    // by chcking the role
-    try {
+        // check if the current user is admin or not
+        // by chcking the role
+        try {
 
-        let user = await Member.findOne({ email });
-        if (user) {
-            return res.status(400).json({ error: "Member already exists" })
-        }
-
-        const checkManager = await Member.findById(managerID);
-        // get the user role
-        // console.log(checkManager)
-        const userRole = checkManager.role;
-        // console.log("role: " + checkManager)
-        // we are taking name email passwod role and admin id from the body
-        if (userRole == 2 || userRole ==3) {
-            //  the current user is admin
-            // he is allowed to create manager or tech member
-            const salt = await bcrypt.genSaltSync(10);
-            const secPassword = await bcrypt.hash(password, salt);
-
-            const newMember = await Member.create({
-                firstname,lastname, email, password: secPassword, role, managerID: checkManager._id, adminId: admin
-            })
-
-            const data = {
-                user: {
-                    id: newMember.id
-                }
+            let user = await Member.findOne({ email });
+            if (user) {
+                return res.status(400).json({ error: "Member already exists" })
             }
 
-            let authtoken = jwt.sign(data, JWT_SECRET);
+            const checkManager = await Member.findById(managerID);
+            // get the user role
+            // console.log(checkManager)
+            const userRole = checkManager.role;
+            // console.log("role: " + checkManager)
+            // we are taking name email passwod role and admin id from the body
+            if (userRole == 2 || userRole == 3) {
+                //  the current user is admin
+                // he is allowed to create manager or tech member
+                const salt = await bcrypt.genSaltSync(10);
+                const secPassword = await bcrypt.hash(password, salt);
 
-            res.json({ authtoken });
+                const newMember = await Member.create({
+                    firstname, lastname, email, password: secPassword, role, managerID: checkManager._id, adminId: admin
+                })
+
+                const data = {
+                    user: {
+                        id: newMember.id
+                    }
+                }
+
+                let authtoken = jwt.sign(data, JWT_SECRET);
+
+                res.json({ authtoken });
+            }
+            else {
+                return res.status(401).json({ error: "Not Allowed" });
+            }
+        } catch (error) {
+            res.status(500).json({ error: "Internal server error" })
         }
-        else {
-            return res.status(401).json({ error: "Not Allowed" });
-        }
-    } catch (error) {
-        res.status(500).json({ error: "Internal server error" })
-    }
-})
+    })
 
 
 
@@ -195,50 +195,50 @@ router.get("/members", [
     }
 })
 
-router.post('/login', 
+router.post('/login',
     [
-        body('email',"Enter a Valid Email").isEmail(),
-        body('password',"Enter a valid Password").isLength({min:5}),
+        body('email', "Enter a Valid Email").isEmail(),
+        body('password', "Enter a valid Password").isLength({ min: 5 }),
     ]
-,async (req, res) => {
-    // console.log("Login hit")
-    // console.log(req.body)
+    , async (req, res) => {
+        // console.log("Login hit")
+        // console.log(req.body)
 
-    const errors = validationResult(req);
+        const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error:"Check Again the fields :)"});
+            return res.status(400).json({ error: "Check Again the fields :)" });
         }
 
-    const { email, password } = req.body;
+        const { email, password } = req.body;
 
-    try {
-        // console.log("Inside login try")
-        let user = await Member.findOne({ email })
-        // // console.log(user.email, user.password)
+        try {
+            // console.log("Inside login try")
+            let user = await Member.findOne({ email })
+            // // console.log(user.email, user.password)
 
-        if (!user) {
-            return res.status(400).json({ error: "Enter a valid credentials" })
-        }
-
-        const passwordCompare = await bcrypt.compare(password, user.password);
-        if (!passwordCompare) {
-            return res.status(400).json({ error: "Enter correct credentials" });
-        }
-        let data = {
-            user: {
-                id: user.id
+            if (!user) {
+                return res.status(400).json({ error: "Enter a valid credentials" })
             }
+
+            const passwordCompare = await bcrypt.compare(password, user.password);
+            if (!passwordCompare) {
+                return res.status(400).json({ error: "Enter correct credentials" });
+            }
+            let data = {
+                user: {
+                    id: user.id
+                }
+            }
+            let authtoken = jwt.sign(data, JWT_SECRET);
+            res.json({ authtoken })
+
+            // save this token into local storage
+
+        } catch (error) {
+            // console.log("Inside login try")
+            res.status(500).json({ error: "Internal server error" })
         }
-        let authtoken = jwt.sign(data, JWT_SECRET);
-        res.json({ authtoken })
-
-        // save this token into local storage
-
-    } catch (error) {
-        // console.log("Inside login try")
-        res.status(500).json({ error: "Internal server error" })
-    }
-})
+    })
 
 // create endpoint to get role form the user id 
 
@@ -273,22 +273,22 @@ router.get('/getmemberrole', fetchUser, async (req, res) => {
 })
 
 router.post('/createdr', [
-    body('firstname','').isLength({min:3}),
-    body('middlename','').isLength({min:3}),
-    body('lastname','').isLength({min:3}),
-    body('phone','').isNumeric(),
-    body('email','').isEmail(),
-    body('qualification','').isLength({min:3}),
-    body('specialty','').isLength({min:3}),
-    body('experience','').isNumeric(),
-    body('license','').isLength({min:3}),
-    body('domain','').isLength({min:3}),
-    body('address','').isLength({min:5}),
-],fetchUser, async (req, res) => {
+    body('firstname', '').isLength({ min: 3 }),
+    body('middlename', '').isLength({ min: 3 }),
+    body('lastname', '').isLength({ min: 3 }),
+    body('phone', '').isNumeric(),
+    body('email', '').isEmail(),
+    body('qualification', '').isLength({ min: 3 }),
+    body('specialty', '').isLength({ min: 3 }),
+    body('experience', '').isNumeric(),
+    body('license', '').isLength({ min: 3 }),
+    body('domain', '').isLength({ min: 3 }),
+    body('address', '').isLength({ min: 5 }),
+], fetchUser, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error:"Check Again the fields :)"});
+        return res.status(400).json({ error: "Check Again the fields :)" });
     }
 
     // check if the current user is mr or not
@@ -311,9 +311,9 @@ router.post('/createdr', [
     try {
         if (role.role <= 3) {
             const {
-                mrID, 
+                mrID,
                 managerID,
-                adminID, 
+                adminID,
                 firstname,
                 middlename,
                 lastname,
@@ -333,9 +333,9 @@ router.post('/createdr', [
             }
 
             const newDoctor = await Doctor.create({
-                mrID, 
+                mrID,
                 managerID,
-                adminID, 
+                adminID,
                 firstname,
                 middlename,
                 lastname,
@@ -348,8 +348,8 @@ router.post('/createdr', [
                 domain,
                 address,
                 status,
-                createdOn:currenttime,
-                createdBy:role._id
+                createdOn: currenttime,
+                createdBy: role._id
             })
 
 
@@ -497,19 +497,19 @@ router.get('/getdrs', fetchUser, async (req, res) => {
 
         }
 
-        
-        const skip = (page -1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
-        
+
+        const skip = (page - 1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
+
         // const drs = await Doctor.find();
         // res.json({ drs });
         const countPromise = Doctor.estimatedDocumentCount(query);
         const itemsPromise = Doctor.find().limit(ITEMS_PER_PAGE).skip(skip);
-        
 
-        const [count,items]  = await Promise.all([countPromise,itemsPromise]);
-        
+
+        const [count, items] = await Promise.all([countPromise, itemsPromise]);
+
         const pageCount = count / ITEMS_PER_PAGE;
-        
+
         res.json({
             pagination: {
                 count,
@@ -544,7 +544,7 @@ router.get('/getnewdrs', fetchUser, async (req, res) => {
         // console.log("getnewdrs")
         // const drs = await Doctor.find({$and:[{status:"Rejected"},{mrID:userID}]})
 
-        const drs = await Doctor.find({ $and: [{ status: "New" },{managerID:manager}] })
+        const drs = await Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] })
         // db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )
         // db.contributor.find({$or: [{branch: "ECE"}, {joiningYear: 2017}]}).pretty()
         res.json({ drs });
@@ -757,12 +757,12 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
             // const drs = await Doctor.find({ mrId:userDetails._id })
-            const drs = await Doctor.find({$and:[{status:"Rejected"},{mrID:userID}]})
+            const drs = await Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] })
             // {$and:[{name:"Molu"},{marks:50}]}
             console.log("notapproveddrsmr")
             // console.log(drs)
             res.json({ drs });
-            
+
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
@@ -771,6 +771,111 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
+
+
+router.post('/forgotpassword', async (req, res) => {
+    const { email } = req.body;
+    // console.log(email)
+    try {
+        // check if any user exists or not with the email
+        const checkUser = await Member.findOne({ email })
+        if (!checkUser) {
+            return res.status(404).json({ error: "Member not found" })
+        }
+
+        console.log(checkUser + " check user")
+
+        const secret = JWT_SECRET + checkUser.password;
+        const token = jwt.sign({ email: checkUser.email, id: checkUser._id }, secret, {
+            expiresIn: '5m',
+        });
+        const link = `${process.env.REACT_APP_URL}/api/auth/reset-password/${checkUser._id}/${token}`
+        // const link = `http://localhost:5000/resetpassword/${checkUser._id}/${token}`;
+        // console.log("henlo")
+        console.log(link + " link")
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+        // res.status(500).json({ error: error })
+    }
+})
+
+
+router.get("/reset-password/:id/:token", async (req, res) => {
+    try{
+        
+        const {id,token} = req.params;
+
+        const checkUser = await Member.findOne({ _id:id })
+        if (!checkUser) {
+            return res.status(404).json({ error: "Member not found" })
+        }
+
+        const secret = JWT_SECRET + checkUser.password;
+        const verify = jwt.verify(token,secret)
+        res.render("index",{email:verify.email});
+        
+    }catch (error){
+        console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+// router.post("/reset-password/:id/:token", async (req, res) => {
+//     try{
+//         const {id,token} = req.params;
+//         const {password} = req.body;
+//         console.log("password " + password)
+
+//         const checkUser = await Member.findOne({ _id:id })
+//         if (!checkUser) {
+//             return res.status(404).json({ error: "Member not found" })
+//         }
+
+//         const secret = JWT_SECRET + checkUser.password;
+//         const verify = jwt.verify(token,secret)
+
+//         let ecryptedpassword;
+
+//         // const salt = await bcrypt.genSalt(10);
+//         // const ecryptedpassword = await bcrypt.hash(password, salt);
+
+//         bcrypt
+//             .genSalt(10)
+//             .then(salt => {
+//                 // console.log('Salt: ', salt)
+//                 return bcrypt.hash(password, salt)
+//             })
+//             .then(hash => {
+//                 ecryptedpassword = hash
+//                 console.log('Hash: ', hash)
+//             })
+//             .catch(err => console.error(err.message))
+
+//         // const salt = await bcrypt.genSaltSync(10);
+//         // const secPassword = await bcrypt.hash(password, salt);
+//         // const ecryptedpassword = await bcrypt.hash(password,10)
+
+//          await Member.updateOne(
+//             {
+//                 _id:id,
+//             },
+//             {
+//                 $set:{
+//                     password:ecryptedpassword,
+//                 }
+//             }
+//         )
+
+//         res.json({error:"Password updated"}) 
+        
+//     }catch (error){
+//         console.log(error)
+//         res.status(500).json({ error: "Internal server error ocured" })
+//     }
+// })
+
 
 module.exports = router;
 
