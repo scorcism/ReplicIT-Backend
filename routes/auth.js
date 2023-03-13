@@ -7,6 +7,7 @@ const fetchUser = require('../middleware/fetchUser');
 const Doctor = require('../models/Doctor');
 const JWT_SECRET = "supermanbatmansinchan"
 const { body, validationResult } = require('express-validator');
+const ITEMS_PER_PAGE = 10;
 
 // contains routes for 
 /**
@@ -463,18 +464,42 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
 
 // get all the mr of specific manager
 router.get('/getmanagermr', fetchUser, async (req, res) => {
-
+    let userID = req.user.id;
+    const page = req.query.page || 1;
     // check if the current user is mr or not 
     // if mr get all the doctors
     try {
 
-        const userID = req.user.id;
         const userDetails = await Member.findById(userID)
         const userRole = userDetails.role
 
         if (userRole == 2) {
-            const items = await Member.find({ managerID: userID });
-            res.json({ items });
+            const query = { 
+
+            }
+
+            const skip = (page - 1) * ITEMS_PER_PAGE;
+            const countPromise = Member.estimatedDocumentCount({managerID:userID});
+            const itemsPromise = Member.find({managerID: userID}).limit(ITEMS_PER_PAGE).skip(skip);
+            
+            const [count, items] = await Promise.all([countPromise, itemsPromise]);
+            const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+            console.log("page: "+page)
+            console.log("count: "+count)
+            console.log("pageCount: "+ pageCount)
+            console.log("items: "+items)
+            console.log("managerID: "+ userID)
+            res.json({
+                pagination: {
+                    count,
+                    pageCount
+                },
+                items
+            });
+
+
+            //const items = await Member.find({ managerID: userID });
+            //res.json({ items });
 
         } else {
             return res.status(401).json({ error: "Not Allowed" });
@@ -485,7 +510,7 @@ router.get('/getmanagermr', fetchUser, async (req, res) => {
     }
 })
 
-const ITEMS_PER_PAGE = 10;
+
 // get all the doctors
 router.get('/getdrs', fetchUser, async (req, res) => {
 
@@ -724,16 +749,39 @@ router.put("/addwebsite/:id", fetchUser, async (req, res) => {
 // show all the not approved doctor to the mr
 router.get("/notapproveddrs", fetchUser, async (req, res) => {
     let userID = req.user.id;
+    const page = req.query.page || 1;
 
     try {
         // get the role of the id 
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
+        
 
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
-            const drs = await Doctor.find({ status: "Rejected" })
-            res.json({ drs });
+            
+            const query = { status: "Rejected"
+
+            }
+
+            const skip = (page - 1) * ITEMS_PER_PAGE;
+            const countPromise = Doctor.estimatedDocumentCount(query);
+            const itemsPromise = Doctor.find({status: "Rejected"}).limit(ITEMS_PER_PAGE).skip(skip);
+            
+            const [count, drs] = await Promise.all([countPromise, itemsPromise]);
+            const pageCount = count / ITEMS_PER_PAGE;
+
+            //console.log(count)
+            //console.log(drs)
+            //const drs = await Doctor.find({  })
+            //res.json({ drs });
+            res.json({
+                pagination: {
+                    count,
+                    pageCount
+                },
+                drs
+            });
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
@@ -746,6 +794,7 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
 // show all the not approved doctor of respective mr
 router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
     let userID = req.user.id;
+    const page = req.query.page2 || 1;
     // console.log("inside not approved dr mr")
 
     try {
@@ -757,11 +806,27 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
             // const drs = await Doctor.find({ mrId:userDetails._id })
-            const drs = await Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] })
+            const query = {$and: [{status: "Rejected"}, {mrID: userID}]
+            }
+
+            const skip = (page - 1) * ITEMS_PER_PAGE;
+            const countPromise = Doctor.estimatedDocumentCount(query);
+            const itemsPromise = Doctor.find({$and:[{status: "Rejected"}, {mrID:userID}]}).limit(ITEMS_PER_PAGE).skip(skip);
+            
+            const [count, drs] = await Promise.all([countPromise, itemsPromise]);
+            const pageCount = count / ITEMS_PER_PAGE;
+            // const drs = await Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] })
             // {$and:[{name:"Molu"},{marks:50}]}
             console.log("notapproveddrsmr")
             // console.log(drs)
-            res.json({ drs });
+            //res.json({ drs });
+            res.json({
+                pagination: {
+                    count,
+                    pageCount
+                },
+                drs
+            });
 
         } else {
             return res.status(401).json({ error: "Not Allowed" });
