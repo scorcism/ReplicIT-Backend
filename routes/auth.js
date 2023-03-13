@@ -474,21 +474,21 @@ router.get('/getmanagermr', fetchUser, async (req, res) => {
         const userRole = userDetails.role
 
         if (userRole == 2) {
-            const query = { 
-
+            const query = {
+                managerID: userID
             }
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
-            const countPromise = Member.estimatedDocumentCount({managerID:userID});
-            const itemsPromise = Member.find({managerID: userID}).limit(ITEMS_PER_PAGE).skip(skip);
-            
+            const countPromise = Member.countDocuments(query);
+            const itemsPromise = Member.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+
             const [count, items] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
-            console.log("page: "+page)
-            console.log("count: "+count)
-            console.log("pageCount: "+ pageCount)
-            console.log("items: "+items)
-            console.log("managerID: "+ userID)
+            // console.log("page: " + page)
+            // console.log("count: " + count)
+            // console.log("pageCount: " + pageCount)
+            // console.log("items: " + items)
+            // console.log("managerID: " + userID)
             res.json({
                 pagination: {
                     count,
@@ -565,14 +565,34 @@ router.get('/getmembers', fetchUser, async (req, res) => {
 // All new doctors
 router.get('/getnewdrs', fetchUser, async (req, res) => {
     const manager = req.user.id
+    const page = req.query.page || 1;
     try {
-        // console.log("getnewdrs")
-        // const drs = await Doctor.find({$and:[{status:"Rejected"},{mrID:userID}]})
 
-        const drs = await Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] })
-        // db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )
-        // db.contributor.find({$or: [{branch: "ECE"}, {joiningYear: 2017}]}).pretty()
-        res.json({ drs });
+        const skip = (page - 1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
+
+        // const drs = await Doctor.find();
+        // res.json({ drs });
+        const countPromise = Doctor.countDocuments({ $and: [{ status: "New" }, { managerID: manager }] });
+        // const itemsPromise = Doctor.find().limit(ITEMS_PER_PAGE).skip(skip);
+        const drsPromise = Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] }).limit(ITEMS_PER_PAGE).skip(skip)
+
+
+        const [count, drs] = await Promise.all([countPromise, drsPromise]);
+
+        const pageCount = count / ITEMS_PER_PAGE;
+
+        res.json({
+            pagination: {
+                count,
+                pageCount
+            },
+            drs
+        });
+
+
+        // const drs = await Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] })
+
+
     } catch (e) {
         // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
@@ -639,13 +659,12 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
-        if (userrole == 2 || userrole == 3 || userrole == 1) {
+        
             // show all the docs with approved status
             const items = await Doctor.find({ status: "Approved" })
+            
             res.json({ items });
-        } else {
-            return res.status(401).json({ error: "Not Allowed" });
-        }
+        
     } catch (e) {
         // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
@@ -755,19 +774,20 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
         // get the role of the id 
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
-        
+
 
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
-            
-            const query = { status: "Rejected"
+
+            const query = {
+                status: "Rejected"
 
             }
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Doctor.estimatedDocumentCount(query);
-            const itemsPromise = Doctor.find({status: "Rejected"}).limit(ITEMS_PER_PAGE).skip(skip);
-            
+            const itemsPromise = Doctor.find({ status: "Rejected" }).limit(ITEMS_PER_PAGE).skip(skip);
+
             const [count, drs] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = count / ITEMS_PER_PAGE;
 
@@ -806,13 +826,14 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
         if (userrole == 0 || userrole == 3 || userrole == 1 || userrole == 2) {
             // show all the docs with approved status
             // const drs = await Doctor.find({ mrId:userDetails._id })
-            const query = {$and: [{status: "Rejected"}, {mrID: userID}]
+            const query = {
+                $and: [{ status: "Rejected" }, { mrID: userID }]
             }
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Doctor.estimatedDocumentCount(query);
-            const itemsPromise = Doctor.find({$and:[{status: "Rejected"}, {mrID:userID}]}).limit(ITEMS_PER_PAGE).skip(skip);
-            
+            const itemsPromise = Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] }).limit(ITEMS_PER_PAGE).skip(skip);
+
             const [count, drs] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = count / ITEMS_PER_PAGE;
             // const drs = await Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] })
@@ -868,20 +889,20 @@ router.post('/forgotpassword', async (req, res) => {
 
 
 router.get("/reset-password/:id/:token", async (req, res) => {
-    try{
-        
-        const {id,token} = req.params;
+    try {
 
-        const checkUser = await Member.findOne({ _id:id })
+        const { id, token } = req.params;
+
+        const checkUser = await Member.findOne({ _id: id })
         if (!checkUser) {
             return res.status(404).json({ error: "Member not found" })
         }
 
         const secret = JWT_SECRET + checkUser.password;
-        const verify = jwt.verify(token,secret)
-        res.render("index",{email:verify.email});
-        
-    }catch (error){
+        const verify = jwt.verify(token, secret)
+        res.render("index", { email: verify.email });
+
+    } catch (error) {
         console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
@@ -934,7 +955,7 @@ router.get("/reset-password/:id/:token", async (req, res) => {
 //         )
 
 //         res.json({error:"Password updated"}) 
-        
+
 //     }catch (error){
 //         console.log(error)
 //         res.status(500).json({ error: "Internal server error ocured" })

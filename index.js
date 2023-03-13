@@ -4,7 +4,7 @@ const connectToMongo = require('./db/dbConnect');
 // import * as dotenv from 'dotenv' 
 const dotenv = require('dotenv')
 const app = express();
-const Port = 5001;
+const Port = 5000;
 dotenv.config()
 // middlewares
 app.use(express.json())
