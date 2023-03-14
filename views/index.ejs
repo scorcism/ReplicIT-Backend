@@ -10,18 +10,48 @@
     <script>
         var status = `<%- JSON.stringify(status) %>`;
         console.log(status)
-        if(JSON.parse(status) == 1){
-            if(confirm("Password Updated! Do you want to Login?")){
+        if (JSON.parse(status) == 1) {
+            if (confirm("Password Updated! Do you want to Login?")) {
                 let location = 'http://localhost:3000/login'
-                window.location.href=`${location}`
+                window.location.href = `${location}`
             }
         }
     </script>
 
+    <script>
+        function validate_password() {
+            let pass = document.getElementById('password').value;
+            let confirm_pass = document.getElementById('confirm-password').value;
+            if (pass != confirm_pass) {
+                document.getElementById('wrong_pass_alert').style.color = 'red';
+                document.getElementById('wrong_pass_alert').innerHTML
+                    = '☒ Use same password';
+                document.getElementById('create').disabled = true;
+                document.getElementById('create').style.opacity = (0.4);
+            } else {
+                document.getElementById('wrong_pass_alert').style.color = 'green';
+                document.getElementById('wrong_pass_alert').innerHTML =
+                    '🗹 Password Matched';
+                document.getElementById('create').disabled = false;
+                document.getElementById('create').style.opacity = (1);
+            }
+        }
+    </script>
+    <script>
+        function verifyPassword() {
+            let pass = document.getElementById('password').value;
+            let confirm_pass = document.getElementById('confirm-password').value;
+            
+            if(pass !="" && confirm_pass != ""){
+                return true;
+            }
+            return false;
+        }
+    </script>
 </head>
 
 <body>
-    <h1>
+    <!-- <h1>
         <%= email %>
     </h1>
         <form action="" method="post">
@@ -29,7 +59,56 @@
             <input type="password" name="confirm-password" id="confirm-password" placeholder="confirm password" />
             <input type="submit" name="password" value="Submit" />
 
-        </form>
+        </form> -->
+    <div class="w-[100%]">
+        <div
+            class="min-h-screen bg-gradient-to-r from-purple-400 to-blue-400 py-6 flex flex-col justify-center sm:py-12 ">
+            <div class="relative py-3 sm:max-w-xl sm:mx-auto flex justify-center">
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl">
+                </div>
+                <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20 mb-[-10px]">
+                    <div class="max-w-md mx-auto ml-10 mr-10">
+                        <div class="flex flex-col justify-center mt-[-25px] -mb-[10px]">
+                            <h1 class="text-black text-4xl capitalize text-center font-semibold">replicit</h1>
+                            <h1 class="">
+                                <span class="text-black text-xl">Email:   </span>
+
+                                <%= email %>
+                            </h1>
+                        </div>
+                        <div class="divide-y divide-gray-200">
+                            <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                                <form action="" method="post" onsubmit ="return verifyPassword()">
+                                    <div class="relative">
+                                        <input autocomplete="off" id="password" name="password" type="password"
+                                            class="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600 "
+                                            placeholder="Password" />
+                                        <label for="password"
+                                            class="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm ">Password</label>
+                                    </div>
+                                    <div class="relative mt-5">
+                                        <input onkeyup="validate_password()" autocomplete="off" id="confirm-password"
+                                            name="confirm-password" type="password"
+                                            class="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600 "
+                                            placeholder="Confirm Password" />
+                                        <label for="password"
+                                            class="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-2.5 peer-focus:text-gray-600 peer-focus:text-sm ">Confirm
+                                        </label>
+                                    </div>
+                                    <span id="wrong_pass_alert"></span>
+                                    <div class="relative flex flex-rwo justify-between w-full">
+                                        <input id="create" type="submit"
+                                            class="cursor-pointer bg-blue-700 hover:bg-blue-600 hover:font-semibold hover:easein text-white rounded-md px-4 py-1 mt-2"
+                                            name="password" value="Submit" />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 </body>
 
 </html>

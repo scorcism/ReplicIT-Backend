@@ -887,7 +887,7 @@ router.post('/forgotpassword',[
 
         const secret = JWT_SECRET + checkUser.password;
         const token = jwt.sign({ email: checkUser.email, id: checkUser._id }, secret, {
-            expiresIn: '10m',
+            expiresIn: '30m',
         });
         const link = `${process.env.REACT_APP_URL}/api/auth/reset-password/${checkUser._id}/${token}`
 
