@@ -926,28 +926,28 @@ router.post('/forgotpassword',[
 
         let ouremail = `projectreplicit@gmail.com`;
 
-        // var transporter = nodemailer.createTransport({
-        //     service: 'gmail',
-        //     auth: {
-        //       user: `${ouremail}`,
-        //       pass: 'yourpassword'
-        //     }
-        //   });
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: `${ouremail}`,
+              pass: 'wtcafzrriavixyxu'
+            }
+          });
           
-        //   var mailOptions = {
-        //     from: `${ouremail}`,
-        //     to: `${checkUser.email}`,
-        //     subject: 'Reset Password - Replicit',
-        //     text: `${link}`
-        //   };
+          var mailOptions = {
+            from: `${ouremail}`,
+            to: `${checkUser.email}`,
+            subject: 'Reset Password - Replicit',
+            text: `${link}`
+          };
           
-        //   transporter.sendMail(mailOptions, function(error, info){
-        //     if (error) {
-        //       console.log(error);
-        //     } else {
-        //       console.log('Email sent: ' + info.response);
-        //     }
-        //   });
+          transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
 
         console.log(link + " link")
         res.status(200).json({message:"Am email has been sent"})
