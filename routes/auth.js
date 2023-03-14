@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const fetchUser = require('../middleware/fetchUser');
 const Doctor = require('../models/Doctor');
+const nodemailer = require('nodemailer');
+
 const JWT_SECRET = "supermanbatmansinchan"
 const { body, validationResult } = require('express-validator');
 const ITEMS_PER_PAGE = 10;
@@ -859,8 +861,20 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
 })
 
 
-router.post('/forgotpassword', async (req, res) => {
+router.post('/forgotpassword',[
+    body('email', 'Provide an email').isEmail(),
+
+], async (req, res) => {
+
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: "Check All The Fields" });
+    }
+
+
     const { email } = req.body;
+    // console.log("Inside forgot password")
     // console.log(email)
     try {
         // check if any user exists or not with the email
@@ -869,19 +883,45 @@ router.post('/forgotpassword', async (req, res) => {
             return res.status(404).json({ error: "Member not found" })
         }
 
-        console.log(checkUser + " check user")
+        // console.log(checkUser + " check user")
 
         const secret = JWT_SECRET + checkUser.password;
         const token = jwt.sign({ email: checkUser.email, id: checkUser._id }, secret, {
-            expiresIn: '5m',
+            expiresIn: '10m',
         });
         const link = `${process.env.REACT_APP_URL}/api/auth/reset-password/${checkUser._id}/${token}`
-        // const link = `http://localhost:5000/resetpassword/${checkUser._id}/${token}`;
-        // console.log("henlo")
+
+
+        let ouremail = ``;
+
+        // var transporter = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //       user: `${ouremail}`,
+        //       pass: 'yourpassword'
+        //     }
+        //   });
+          
+        //   var mailOptions = {
+        //     from: `${ouremail}`,
+        //     to: `${checkUser.email}`,
+        //     subject: 'Reset Password - Replicit',
+        //     text: `${link}`
+        //   };
+          
+        //   transporter.sendMail(mailOptions, function(error, info){
+        //     if (error) {
+        //       console.log(error);
+        //     } else {
+        //       console.log('Email sent: ' + info.response);
+        //     }
+        //   });
+
         console.log(link + " link")
+        res.status(200).json({message:"Am email has been sent"})
 
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
         // res.status(500).json({ error: error })
     }
@@ -899,68 +939,62 @@ router.get("/reset-password/:id/:token", async (req, res) => {
         }
 
         const secret = JWT_SECRET + checkUser.password;
-        const verify = jwt.verify(token, secret)
-        res.render("index", { email: verify.email });
 
+        try{
+            const verify = jwt.verify(token, secret)
+            res.render("index", { email: verify.email,status:0 });
+
+        }catch(error){
+            return res.status(404).json({ error: "Not verified" })
+        }
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
     }
 })
 
-// router.post("/reset-password/:id/:token", async (req, res) => {
-//     try{
-//         const {id,token} = req.params;
-//         const {password} = req.body;
-//         console.log("password " + password)
+router.post("/reset-password/:id/:token", async (req, res) => {
+    try{
+        const {id,token} = req.params;
+        const {password} = req.body;
 
-//         const checkUser = await Member.findOne({ _id:id })
-//         if (!checkUser) {
-//             return res.status(404).json({ error: "Member not found" })
-//         }
+        const passwordExtracted = password[0];
+        
+        const checkUser = await Member.findOne({ _id:id })
+        if (!checkUser) {
+            return res.status(404).json({ error: "Member not found" })
+        }
 
-//         const secret = JWT_SECRET + checkUser.password;
-//         const verify = jwt.verify(token,secret)
+        const secret = JWT_SECRET + checkUser.password;
+        try {
+            const verify = jwt.verify(token,secret)
+            const salt = await bcrypt.genSaltSync(10);
+            const secPassword = await bcrypt.hash(passwordExtracted, salt);
 
-//         let ecryptedpassword;
+            console.log("id:==== " + id ) 
+             await Member.updateOne(
+                {
+                    _id:id,
+                },
+                {
+                    $set:{
+                        password:secPassword,
+                    }
+                }
+            )
+    
+            // res.json({error:"Password updated"})
+            res.render("index", { email: verify.email,status:1 });
+        } catch (error) {
+            // console.log(error)
+            res.status(404).json({ error: "Not Verified" })
+        } 
 
-//         // const salt = await bcrypt.genSalt(10);
-//         // const ecryptedpassword = await bcrypt.hash(password, salt);
-
-//         bcrypt
-//             .genSalt(10)
-//             .then(salt => {
-//                 // console.log('Salt: ', salt)
-//                 return bcrypt.hash(password, salt)
-//             })
-//             .then(hash => {
-//                 ecryptedpassword = hash
-//                 console.log('Hash: ', hash)
-//             })
-//             .catch(err => console.error(err.message))
-
-//         // const salt = await bcrypt.genSaltSync(10);
-//         // const secPassword = await bcrypt.hash(password, salt);
-//         // const ecryptedpassword = await bcrypt.hash(password,10)
-
-//          await Member.updateOne(
-//             {
-//                 _id:id,
-//             },
-//             {
-//                 $set:{
-//                     password:ecryptedpassword,
-//                 }
-//             }
-//         )
-
-//         res.json({error:"Password updated"}) 
-
-//     }catch (error){
-//         console.log(error)
-//         res.status(500).json({ error: "Internal server error ocured" })
-//     }
-// })
+    }catch (error){
+        console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
 
 
 module.exports = router;
