@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 
 const JWT_SECRET = "supermanbatmansinchan"
 const { body, validationResult } = require('express-validator');
+const { Query } = require('mongoose');
 const ITEMS_PER_PAGE = 10;
 
 // contains routes for 
@@ -678,16 +679,26 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
 // check if the curretn user is tech or admin or not 
 router.get("/donewebsites", fetchUser, async (req, res) => {
     let userID = req.user.id;
-
+    let page = req.query.page || 1
+    // console.log("page db: "+page)
     try {
         // get the role of the id 
         let userDetails = await Member.findById(userID);
         let userrole = userDetails.role
 
+        let query = { status: "Done" }
+        const skip = (page - 1) * ITEMS_PER_PAGE;
+        const countPromise = Doctor.countDocuments(query);
+        const doctorsDonePromise = Doctor.find(query).limit(ITEMS_PER_PAGE).skip(skip);
 
-        // show all the docs with approved status
-        const doctorsDone = await Doctor.find({ status: "Done" })
-        res.json({ doctorsDone });
+        const [count, doctorsDone] = await Promise.all([countPromise, doctorsDonePromise]);
+
+        const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+        // console.log("count : " + count)
+        res.json({ pagination:{
+            count,
+            pageCount
+        },doctorsDone });
 
     } catch (e) {
         // // console.log(e)
@@ -699,6 +710,7 @@ router.get("/donewebsites", fetchUser, async (req, res) => {
 // check if the curretn user is tech or admin or not 
 router.get("/verifieddrs", fetchUser, async (req, res) => {
     let userID = req.user.id;
+    let page=  req.query.page || 1;
 
     try {
         // get the role of the id 
@@ -706,9 +718,29 @@ router.get("/verifieddrs", fetchUser, async (req, res) => {
         let userrole = userDetails.role
 
         if (userrole == 3 || userrole == 1) {
+            let query = { status: "Verified" }
             // show all the docs with approved status
-            const doctorsApproved = await Doctor.find({ status: "Verified" })
-            res.json({ doctorsApproved });
+
+            const skip = (page - 1) * ITEMS_PER_PAGE;
+            const countPromise = Doctor.countDocuments(query);
+ 
+            const doctorsApprovedPromise = Doctor.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+
+            const [count, doctorsApproved] = await Promise.all([countPromise, doctorsApprovedPromise]);
+
+            const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+
+
+            console.log("Page: " + page)
+            console.log("Count: " + count);
+            console.log("Pagecount "  +pageCount);
+
+            res.json({ pagination:{
+                count,
+                pageCount
+            },doctorsApproved });
+
+
         } else {
             return res.status(401).json({ error: "Not Allowed" });
         }
@@ -892,7 +924,7 @@ router.post('/forgotpassword',[
         const link = `${process.env.REACT_APP_URL}/api/auth/reset-password/${checkUser._id}/${token}`
 
 
-        let ouremail = ``;
+        let ouremail = `projectreplicit@gmail.com`;
 
         // var transporter = nodemailer.createTransport({
         //     service: 'gmail',
