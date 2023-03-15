@@ -556,9 +556,32 @@ router.get('/getdrs', fetchUser, async (req, res) => {
 
 // get all the Members
 router.get('/getmembers', fetchUser, async (req, res) => {
+    const page = req.query.page || 1;
     try {
-        const member = await Member.find();
-        res.json({ member });
+
+        const query = {
+
+        }
+
+        const skip = (page - 1) * ITEMS_PER_PAGE; 
+
+        const countPromise = Member.countDocuments(query);
+
+        const memberPromise = await Member.find().limit(ITEMS_PER_PAGE).skip(skip);
+
+        const [count, member] = await Promise.all([countPromise, memberPromise]);
+
+        const pageCount =Math.ceil( count / ITEMS_PER_PAGE);
+
+        // console.log("Page: " + page)
+        // console.log(pageCount);
+
+        res.json({pagination: {
+            count,
+            pageCount
+        }, member });
+
+
     } catch (e) {
         // // console.log(e)
         res.status(500).json({ error: "Internal server error ocured" })
