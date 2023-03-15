@@ -453,8 +453,23 @@ router.get('/getdrmr', fetchUser, async (req, res) => {
         const userRole = userDetails.role
 
         if (userRole == 0 || userRole == 3) {
-            const items = await Doctor.find({ mrID: userID });
-            res.json({ items });
+
+            const query = { mrID: userID }
+            const skip = (page - 1) * ITEMS_PER_PAGE; 
+
+
+            const countPromise = Doctor.countDocuments(query);
+            const itemsPromise = Doctor.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+
+
+            const [count, items] = await Promise.all([countPromise, itemsPromise]);
+
+            const pageCount = count / ITEMS_PER_PAGE;
+
+            res.json({  pagination: {
+                count,
+                pageCount
+            },items });
 
         } else {
             return res.status(401).json({ error: "Not Allowed" });
@@ -895,7 +910,7 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
             const pageCount = count / ITEMS_PER_PAGE;
             // const drs = await Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] })
             // {$and:[{name:"Molu"},{marks:50}]}
-            console.log("notapproveddrsmr")
+            // console.log("notapproveddrsmr")
             // console.log(drs)
             //res.json({ drs });
             res.json({
