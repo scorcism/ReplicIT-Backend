@@ -569,6 +569,28 @@ router.get('/getdrs', fetchUser, async (req, res) => {
     }
 })
 
+// get all the doctors
+router.get('/getdrscount', fetchUser, async (req, res) => {
+    try {
+        // const skip = (page - 1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
+
+        const drs = await Doctor.find();
+        res.json({ drs });
+        // const itemsPromise = Doctor.find();
+
+        // const [ items] = await Promise.all([ itemsPromise]);
+
+        // res.json({
+        //     items
+        // });
+
+    } catch (e) {
+        // // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+
 // get all the Members
 router.get('/getmembers', fetchUser, async (req, res) => {
     const page = req.query.page || 1;
