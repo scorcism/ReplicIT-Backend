@@ -546,7 +546,7 @@ router.get('/getdrs', fetchUser, async (req, res) => {
         // const drs = await Doctor.find();
         // res.json({ drs });
         const countPromise = Doctor.estimatedDocumentCount(query);
-        const itemsPromise = Doctor.find().limit(ITEMS_PER_PAGE).skip(skip);
+        const itemsPromise = Doctor.find().sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
 
         const [count, items] = await Promise.all([countPromise, itemsPromise]);
@@ -574,7 +574,7 @@ router.get('/getdrscount', fetchUser, async (req, res) => {
     try {
         // const skip = (page - 1) * ITEMS_PER_PAGE; // page 2 items per page 10 so skip 1st 20
 
-        const drs = await Doctor.find();
+        const drs = await Doctor.find().sort({createdAt:-1});
         res.json({ drs });
         // const itemsPromise = Doctor.find();
 
@@ -604,7 +604,7 @@ router.get('/getmembers', fetchUser, async (req, res) => {
 
         const countPromise = Member.countDocuments(query);
 
-        const memberPromise = await Member.find().limit(ITEMS_PER_PAGE).skip(skip);
+        const memberPromise = await Member.find().sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
         const [count, member] = await Promise.all([countPromise, memberPromise]);
 
@@ -637,7 +637,7 @@ router.get('/getnewdrs', fetchUser, async (req, res) => {
         // res.json({ drs });
         const countPromise = Doctor.countDocuments({ $and: [{ status: "New" }, { managerID: manager }] });
         // const itemsPromise = Doctor.find().limit(ITEMS_PER_PAGE).skip(skip);
-        const drsPromise = Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] }).limit(ITEMS_PER_PAGE).skip(skip)
+        const drsPromise = Doctor.find({ $and: [{ status: "New" }, { managerID: manager }] }).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip)
 
 
         const [count, drs] = await Promise.all([countPromise, drsPromise]);
@@ -724,7 +724,7 @@ router.get("/approveddrs", fetchUser, async (req, res) => {
 
         
             // show all the docs with approved status
-            const items = await Doctor.find({ status: "Approved" })
+            const items = await Doctor.find({ status: "Approved" }).sort({createdAt:-1})
             
             res.json({ items });
         
@@ -749,7 +749,7 @@ router.get("/donewebsites", fetchUser, async (req, res) => {
         let query = { status: "Done" }
         const skip = (page - 1) * ITEMS_PER_PAGE;
         const countPromise = Doctor.countDocuments(query);
-        const doctorsDonePromise = Doctor.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+        const doctorsDonePromise = Doctor.find(query).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
         const [count, doctorsDone] = await Promise.all([countPromise, doctorsDonePromise]);
 
@@ -784,7 +784,7 @@ router.get("/verifieddrs", fetchUser, async (req, res) => {
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Doctor.countDocuments(query);
  
-            const doctorsApprovedPromise = Doctor.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+            const doctorsApprovedPromise = Doctor.find(query).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
             const [count, doctorsApproved] = await Promise.all([countPromise, doctorsApprovedPromise]);
 
@@ -880,7 +880,7 @@ router.get("/notapproveddrs", fetchUser, async (req, res) => {
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Doctor.estimatedDocumentCount(query);
-            const itemsPromise = Doctor.find({ status: "Rejected" }).limit(ITEMS_PER_PAGE).skip(skip);
+            const itemsPromise = Doctor.find({ status: "Rejected" }).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
             const [count, drs] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = count / ITEMS_PER_PAGE;
@@ -926,7 +926,7 @@ router.get("/notapproveddrsmr", fetchUser, async (req, res) => {
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Doctor.estimatedDocumentCount(query);
-            const itemsPromise = Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] }).limit(ITEMS_PER_PAGE).skip(skip);
+            const itemsPromise = Doctor.find({ $and: [{ status: "Rejected" }, { mrID: userID }] }).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
             const [count, drs] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = count / ITEMS_PER_PAGE;
