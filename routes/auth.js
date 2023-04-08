@@ -1089,5 +1089,53 @@ router.post("/reset-password/:id/:token", async (req, res) => {
 })
 
 
+
+router.get('/getallnewdoctors', fetchUser, async (req, res) => {
+    try {
+
+        const drs = await Doctor.countDocuments({status:"New"});
+        res.json({ drs });
+
+    } catch (e) {
+        // // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+router.get('/getalldonedoctors', fetchUser, async (req, res) => {
+    try {
+
+        const drs = await Doctor.countDocuments({status:"Done"});
+        res.json({ drs });
+
+    } catch (e) {
+        // // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+router.get('/getallrejectedrequests', fetchUser, async (req, res) => {
+    try {
+
+        const drs = await Doctor.countDocuments({status:"Rejected"});
+        res.json({ drs });
+
+    } catch (e) {
+        // // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+router.get('/countmr', fetchUser, async (req, res) => {
+    try {
+
+        const drs = await Member.countDocuments({role:0});
+        res.json({ drs });
+
+    } catch (e) {
+        // // console.log(e)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+
+
+
 module.exports = router;
 
