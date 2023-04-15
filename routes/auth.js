@@ -998,7 +998,8 @@ router.post('/forgotpassword',[
             from: `${ouremail}`,
             to: `${checkUser.email}`,
             subject: 'Reset Password - Replicit',
-            text: `${link}`
+            text: `Reset the password using the Following link: \n
+            ${link}`
           };
           
           transporter.sendMail(mailOptions, function(error, info){
