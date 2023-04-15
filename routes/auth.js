@@ -491,7 +491,7 @@ router.get('/getmanagermr', fetchUser, async (req, res) => {
         const userDetails = await Member.findById(userID)
         const userRole = userDetails.role
 
-        if (userRole == 2) {
+        if (userRole == 2 ) {
             const query = {
                 managerID: userID
             }
