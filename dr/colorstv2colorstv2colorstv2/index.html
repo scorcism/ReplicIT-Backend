@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+
+<script defer>
+  let data;
+  async function populate() {
+    const requestURL = './doctordetails.json';
+    const request = new Request(requestURL);
+    const response = await fetch(request);
+    data = await response.json();
+    // console.log(data)
+    // console.log(typeof (data))
+    // console.log(data.userdata[0])
+
+    data = data.userdata[0]
+    // console.log(data.qualification)
+    let docname = document.getElementById("displayname");
+    docname.innerText = "Dr. " + data.firstname + " " + data.middlename + " " + data.lastname
+    let spec = document.getElementById("speciality1");
+    spec.innerText = data.specialty
+    let exper = document.getElementById("exp");
+    exper.innerText = data.experience + " Years of Experience";
+    let contact = document.getElementById("contactno");
+    let qualificati = document.getElementById("qualli")
+    qualificati.innerText = data.qualification
+    let email = document.getElementById("emailid")
+    email.innerText = data.email
+    contact.innerText = data.phone
+    // console.log(data.phone)
+  }
+  populate()
+
+</script>
+
+
+<title>ReplicIT</title>
+<div>
+
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+
+  }
+
+  #menu-toggle:checked+#menu {
+    display: block;
+  }
+
+  #dropdown-toggle:checked+#dropdown {
+    display: block;
+  }
+
+
+  a,
+  span {
+    position: relative;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  a.arrow,
+  span.arrow {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  a:hover {
+    color: teal;
+    text-decoration: none;
+
+  }
+
+  a.arrow .arrow_icon,
+  span.arrow .arrow_icon {
+    position: relative;
+    margin-left: 0.5em;
+  }
+
+  a.arrow .arrow_icon svg,
+  span.arrow .arrow_icon svg {
+    transition: transform 0.3s 0.02s ease;
+    margin-right: 1em;
+  }
+
+  a.arrow .arrow_icon::before,
+  span.arrow .arrow_icon::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #4fbae7;
+    transform: translateY(-50%);
+    transition: width 0.3s ease;
+  }
+
+  a.arrow:hover .arrow_icon::before,
+  span.arrow:hover .arrow_icon::before {
+    width: 1em;
+  }
+
+  a.arrow:hover .arrow_icon svg,
+  span.arrow:hover .arrow_icon svg {
+    transform: translateX(0.75em);
+  }
+
+  /* .cover {
+      border-bottom-right-radius: 128px;
+    } */
+
+  .bg-blue-teal-gradient {
+    background: rgb(49, 130, 206);
+    background: linear-gradient(90deg, rgba(49, 130, 206, 1) 0%, rgba(56, 178, 172, 1) 100%);
+  }
+
+  /* @media (min-width: 1024px) {
+      .cover {
+        border-bottom-right-radius: 256px;
+      }
+    } */
+</style>
+</head>
+
+<body class="antialiased bg-white font-sans text-white-900">
+
+  <main class="w-full">
+
+    <!-- start header -->
+
+
+
+    <header class="top-0 bg-white shadow-lg w-full px-4 sm:px-8 lg:px-16 xl:px-40 2xl:px-64">
+
+
+      <div class="">
+        <ul class="flex justify-end text-white">
+
+      </div>
+      </div>
+
+
+      <div class="flex flex-wrap items-center justify-between py-4">
+        <div class="w-1/2 md:w-auto">
+          <img src="./logo-without-bg.png" class="ml-2" height="35" width="130">
+
+
+
+
+          </a>
+        </div>
+
+        <label for="menu-toggle" class="pointer-cursor md:hidden block"><svg class="fill-current text-white"
+            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+
+          </svg></label>
+
+        <input class="hidden" type="checkbox" id="menu-toggle">
+
+        <div class="hidden md:block w-full md:w-auto" id="menu">
+          <nav
+            class="w-full bg-white md:bg-transparent rounded shadow-lg px-6 py-4 mt-4 text-center md:p-0 md:mt-0 md:shadow-none">
+            <ul class="md:flex place-items-end">
+
+              <li><a class="py-2 inline-block md:text-blue-500 md:hidden lg:block font-semibold" href="#home-section"
+                  class="scroll-smooth"> Home</a></li>
+              <li class="md:ml-4" place item><a class="py-2 inline-block md:text-blue-500 md:px-2 font-semibold"
+                  href="#about" class="scroll-smooth">About Us</a></li>
+              <li class="md:ml-4"><a class="py-2 inline-block md:text-blue-500 md:px-2 font-semibold" href="#contact"
+                  class="scroll-smooth">Contact
+                  Us</a></li>
+
+              </li>
+            </ul>
+          </nav>
+
+
+
+
+          </head>
+        </div>
+    </header>
+
+
+    <div id="home-section">
+      <div id="headerwrap" name="home">
+        <!--<header class="clearfix tb"> 
+       <div class="tb-cell text-center">
+       <i class="fa fa-heart-o icon"></i>
+          <h1>Coffee - Makes you Love</h1>
+          <p>A Lot Can Happen Over Coffee, Its Awesome!!! </p>
+          <a href="#portfolio" class="smoothScroll btn btn-lg">Today's Special</a>-->
+      </div>
+
+    </div>
+
+    </div>
+    <div class="div-pattern2"></div>
+
+    <!-- start hero -->
+    <div class="bg-gray-100 ">
+      <section class="cover bg-blue-teal-gradient relative bg-blue-600 px-4 sm:px-8 lg:px-16 xl:px-40 2xl:px-64 overflow-hidden py-48 flex
+      items-center min-h-screen" style="display: flex; align-items: center; justify-content: center;">
+        <div class="h-full absolute top-0 left-0 z-0">
+          <img src="coverimg.avif" alt="" class=" object-cover opacity-60">
+        </div>
+
+        <div class="lg:w-4/4 xl:w-2/4 relative z-10 h-100 lg:mt-16">
+          <div>
+            <h1 class="text-black text-4xl md:text-5xl xl:text-6xl font-bold leading-tight" id="displayname"></h1>
+
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- end hero -->
+    <!-- About Section -->
+    <div id="about">
+      <div class="bg-white p-3 shadow-sm rounded-sm mt-6">
+        <div class="flex items-center space-x-2 font-semibold text-gray-900 leading-8">
+
+          <!-- End of about section -->
+
+          <div class="my-4"></div>
+
+          <!-- Experience and qualification -->
+          <div class="bg-white p-3 shadow-sm rounded-sm w-full">
+
+            <div class="grid grid-cols-2 justify-items-center ">
+              <div>
+                <div class="flex items-center space-x-2 font-semibold text-gray-900 leading-8 mb-3">
+                  <span class="tracking-wide text-lg">Experience</span>
+                  <br>
+                  <div class="text-teal-600 text-lg" id="exp"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center space-x-2 font-semibold text-gray-900 leading-8 mb-5">
+                  <span class="tracking-wide text-lg">Qualification</span>
+                  <br>
+                  <div class="text-teal-600 text-lg" id="qualli"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center space-x-2 font-semibold text-gray-900 leading-8 mb-3">
+                  <span class="tracking-wide text-lg">Speciality</span>
+                  <br>
+                  <div class="text-teal-600 text-lg" id="speciality1"></div>
+                </div>
+              </div>
+
+            </div>
+            <br>
+            <br>
+            <!-- End of Experience and qualification grid -->
+          </div>
+          <!-- End of profile tab -->
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-3 shadow-sm rounded-sm w-full">
+
+      <br>
+      <br>
+      <!-- End of Experience and education grid -->
+      <!-- end testimonials -->
+      <!-- start cta -->
+      <div id="contact">
+        <section
+          class="relative bg-blue-teal-gradient px-4 sm:px-8 lg:px-16 xl:px-40 2xl:px-64 py-12 text-center md:text-left center">
+          <div class="md:flex md:items-center md:justify-center">
+            <div class="font-bold text-white text-center">
+              <h2 class="text-2xl ">Get in touch with us today!</h2>
+              <div style="display:flex; align-items: center; justify-content: center;" class="text-xl px-3">
+                <div class="" style="">
+                  Contact: &nbsp;<div class="text-red-900 underline" id="contactno"></div> <span class="text-xl text-red-700">OR</span> <br>
+                  Email: &nbsp;<div class="text-red-900 underline" id="emailid"></div>
+                </div>
+    
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+      <!-- end cta -->
+
+      <!-- start footer --->
+      <div class="container">
+
+
+        <footer class="relative bg-gray-300 text-black px-4 py-20">
+          <div class="flex flex-col md:flex-row md:justify-between">
+            <div class="w-full  mx-4 pr-8 mt-12">
+
+              <p class="text-gray-400"></p>
+              <img src="./logo-without-bg.png">
+              <!---->
+            </div>
+
+            <div class="w-full lg:w-4/6 mt-8 lg:mt-0 lg:mx-20 lg:pr-12 mx-4">
+              <h5 class="uppercase tracking-wider font-semibold text-gray-500">Project By</h5>
+              <ul class="mt-4">
+                <li>
+                  <a href="#" title="" class="flex items-center opacity-75 hover:opacity-100">
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        class="fill-current">
+                        <path
+                          d="M12,2C7.589,2,4,5.589,4,9.995C3.971,16.44,11.696,21.784,12,22c0,0,8.029-5.56,8-12C20,5.589,16.411,2,12,2z M12,14 c-2.21,0-4-1.79-4-4s1.79-4,4-4s4,1.79,4,4S14.21,14,12,14z" />
+                      </svg>
+                    </span>
+                    <span class="ml-3">
+                      <strong>Team ReplicIT</strong>
+                      <br>
+                      Department of Computer Science,
+                      <br>K. C. College, HSNC University,
+                      <br>Churchgate,
+                      <br>Mumbai - 400 020
+                    </span>
+                  </a>
+                </li>
+                <li class="mt-4">
+                  <a href="#" title="" class=" flex items-center opacity-75 hover:opacity-100">
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        class="fill-current">
+                        <path
+                          d="M14.594,13.994l-1.66,1.66c-0.577-0.109-1.734-0.471-2.926-1.66c-1.193-1.193-1.553-2.354-1.661-2.926l1.661-1.66 l0.701-0.701L5.295,3.293L4.594,3.994l-1,1C3.42,5.168,3.316,5.398,3.303,5.643c-0.015,0.25-0.302,6.172,4.291,10.766 C11.6,20.414,16.618,20.707,18,20.707c0.202,0,0.326-0.006,0.358-0.008c0.245-0.014,0.476-0.117,0.649-0.291l1-1l0.697-0.697 l-5.414-5.414L14.594,13.994z" />
+                      </svg>
+                    </span>
+                    <span class="ml-3">
+                      +91 83698 65723
+                    </span>
+                  </a>
+                </li>
+                <li class="mt-4">
+                  <a href="#" title="" class="flex items-center opacity-75 hover:opacity-100">
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        class="fill-current">
+                        <path
+                          d="M20,4H4C2.896,4,2,4.896,2,6v12c0,1.104,0.896,2,2,2h16c1.104,0,2-0.896,2-2V6C22,4.896,21.104,4,20,4z M20,8.7l-8,5.334 L4,8.7V6.297l8,5.333l8-5.333V8.7z" />
+                      </svg>
+                    </span>
+                    <span class="ml-3">
+                      projectreplicit@gmail.com
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            </p>
+          </div>
+      </div>
+      </footer>
+      <!-- end footer -->
+
+  </main>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131505823-4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-131505823-4');
+  </script>
+
+</body>
+
+</html>

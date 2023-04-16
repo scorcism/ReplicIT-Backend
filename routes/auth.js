@@ -6,6 +6,9 @@ const bcrypt = require('bcryptjs');
 const fetchUser = require('../middleware/fetchUser');
 const Doctor = require('../models/Doctor');
 const nodemailer = require('nodemailer');
+const fs = require("fs");
+const { mkdir } = require('fs/promises');
+const fse = require('fs-extra');
 
 const JWT_SECRET = "supermanbatmansinchan"
 const { body, validationResult } = require('express-validator');
@@ -398,6 +401,7 @@ router.post('/createdr', [
 // take a stirng and make it to that sring
 // also change the verified by
 router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
+    console.log("Inside updatestatus")
     const doctorID = req.params.id
     const toChangeTo = req.body.tochange;
     try {
@@ -417,6 +421,19 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
             // find by id and update
             try {
                 d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, verifiedBy: loggedInUserID, verifiedOn: todayDate } })
+
+
+                console.log("Inside function up")
+
+
+                getData(doctorID);
+
+
+                console.log("Inside function down")
+
+
+
+
                 res.json({ d });
             } catch (error) {
                 return res.status(401).json({ error: "Not Allowed" });
@@ -424,14 +441,17 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
         } else if (loggedInUserrole == 2 || loggedInUserrole == 3) {
             // the current user is tech member
             // is is allowed to make the status to `certification`
+            // console.log("inside elise if 2 and 3")
             try {
-                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, updatedBy: loggedInUserID, verifiedOn: todayDate } })
-                res.json({ d });
-
                 
-                  
-                getData(doctorID);
-
+                
+                
+                d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, updatedBy: loggedInUserID, verifiedOn: todayDate } })
+                
+                
+                
+                
+                res.json({ d });
 
 
 
@@ -449,7 +469,7 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
 })
 
 
-const getData = async (doctorID) => {
+function getData(doctorID) {
 // CLONING
     async function getUserData() {
         const url = `http://localhost:5000/api/auth/getdrinfo/${doctorID}`;
@@ -458,7 +478,87 @@ const getData = async (doctorID) => {
         console.log(jsonResponse);
     } 
     getUserData()
+    
 }
+router.get('/getdrinfo/:id', async (req, res) => {
+    const doctorID = req.params.id
+    // console.log(doctorID)
+    try {
+
+        // check if doctors with the id exists or not
+        let d = await Doctor.findById(doctorID)
+        if (!d) { return res.status(404).send("Not Found") }
+        // console.log("YOOOOOOOS")
+        // dr  = await Doctor.findById({doctorID})
+
+        let userdata = {d};
+        // console.log(name);
+        let user = userdata.d.firstname +  userdata.d.middlename+ userdata.d.lastname;
+
+
+        // working with fodler creation
+
+
+
+
+        const createFolder = async (path) => {
+            try {
+                if (!fs.existsSync(path)) {
+                    fs.mkdirSync(path, {
+                        recursive: true,
+                    })
+                    console.log('Folder created successfully')
+
+                    let data  = {
+                        userdata: []
+                    }
+
+                    data.userdata.push(userdata.d);
+
+                    let json_data = JSON.stringify(data);
+
+                    fs.writeFile(`./dr/${user}/doctordetails.json`, json_data, 'utf8' ,function (err) {
+                        if (err) {
+                            console.log("Error while appending data ")
+                        }else{
+                            console.log('Saved!');
+                        }
+                    });
+
+                    
+
+                    const srcDir = `./clone_website`;
+                    const destDir = `./dr/${user}`;
+                                                    
+                    try {
+                        fse.copySync(srcDir, destDir, { overwrite: true|false })
+                        console.log('replicit-ed!')
+                    } catch (err) {
+                        console.error(err)
+                    }
+
+                } else {
+                    console.log('Folder already exists')
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        let folderName = `./dr/${user}`;
+        
+        createFolder(folderName)
+
+
+        // console.log(user)
+
+        res.json({d});
+        
+    } catch (error) {
+        // console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
 
 // get all the doctor of specific mr
 router.get('/getdrmr', fetchUser, async (req, res) => {
@@ -726,23 +826,6 @@ router.put('/setrejectmessage/:id', fetchUser, async (req, res) => {
         else {
             return res.status(401).json({ error: "Not Allowed" });
         }
-    } catch (error) {
-        // console.log(error)
-        res.status(500).json({ error: "Internal server error ocured" })
-    }
-})
-router.get('/getdrinfo/:id', async (req, res) => {
-    const doctorID = req.params.id
-    try {
-
-        // check if doctors with the id exists or not
-        let d = await Doctor.findById(doctorID)
-        if (!d) { return res.status(404).send("Not Found") }
-
-        dr  = await Doctor.findById({doctorID})
-
-        res.json({dr});
-        
     } catch (error) {
         // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
