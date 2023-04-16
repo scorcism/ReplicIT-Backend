@@ -498,7 +498,7 @@ router.get('/getmanagermr', fetchUser, async (req, res) => {
 
             const skip = (page - 1) * ITEMS_PER_PAGE;
             const countPromise = Member.countDocuments(query);
-            const itemsPromise = Member.find(query).limit(ITEMS_PER_PAGE).skip(skip);
+            const itemsPromise = Member.find(query).sort({createdAt:-1}).limit(ITEMS_PER_PAGE).skip(skip);
 
             const [count, items] = await Promise.all([countPromise, itemsPromise]);
             const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
@@ -507,6 +507,9 @@ router.get('/getmanagermr', fetchUser, async (req, res) => {
             // console.log("pageCount: " + pageCount)
             // console.log("items: " + items)
             // console.log("managerID: " + userID)
+
+            // console.log(items)
+
             res.json({
                 pagination: {
                     count,

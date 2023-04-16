@@ -12,7 +12,7 @@
         console.log(status)
         if (JSON.parse(status) == 1) {
             if (confirm("Password Updated! Do you want to Login?")) {
-                let location = 'http://localhost:3000/login'
+                let location = 'https://replicit.vercel.app/login'
                 window.location.href = `${location}`
             }
         }
