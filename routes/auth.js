@@ -427,6 +427,14 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
             try {
                 d = await Doctor.findByIdAndUpdate(doctorID, { $set: { status: toChangeTo, updatedBy: loggedInUserID, verifiedOn: todayDate } })
                 res.json({ d });
+
+                
+                  
+                getData(doctorID);
+
+
+
+
             } catch (error) {
                 return res.status(401).json({ error: "Not Allowed" });
             }
@@ -440,6 +448,17 @@ router.put('/updatedrstatus/:id', fetchUser, async (req, res) => {
 
 })
 
+
+const getData = async (doctorID) => {
+// CLONING
+    async function getUserData() {
+        const url = `http://localhost:5000/api/auth/getdrinfo/${doctorID}`;
+        const response = await fetch(url);
+        const jsonResponse = await response.json();
+        console.log(jsonResponse);
+    } 
+    getUserData()
+}
 
 // get all the doctor of specific mr
 router.get('/getdrmr', fetchUser, async (req, res) => {
@@ -707,6 +726,23 @@ router.put('/setrejectmessage/:id', fetchUser, async (req, res) => {
         else {
             return res.status(401).json({ error: "Not Allowed" });
         }
+    } catch (error) {
+        // console.log(error)
+        res.status(500).json({ error: "Internal server error ocured" })
+    }
+})
+router.get('/getdrinfo/:id', async (req, res) => {
+    const doctorID = req.params.id
+    try {
+
+        // check if doctors with the id exists or not
+        let d = await Doctor.findById(doctorID)
+        if (!d) { return res.status(404).send("Not Found") }
+
+        dr  = await Doctor.findById({doctorID})
+
+        res.json({dr});
+        
     } catch (error) {
         // console.log(error)
         res.status(500).json({ error: "Internal server error ocured" })
